@@ -2118,7 +2118,7 @@
           if (curLayerBtn?.dataset.layer === 'legacy') {
             jumpTimelineToDate('2017-08-07', { layer: null, showDock: true });
           } else {
-            updateTimeline(maxIdx, true);
+            updateTimeline(maxIdx, false);
           }
         })
         .catch(() => {});
@@ -2241,7 +2241,7 @@
         }
         const s = String(targetDateStr || '').trim();
         if (!s || s === 'latest') {
-          updateTimeline(maxIdx, true);
+          updateTimeline(maxIdx, false);
           return;
         }
         let bestIdx = maxIdx;
@@ -2270,7 +2270,7 @@
         }
       }
 
-      updateTimeline(maxIdx, true);
+      updateTimeline(maxIdx, false);
 
       timeSlider.addEventListener('input', (e) => updateTimeline(Number(e.target.value), true));
       timeSlider.addEventListener('change', (e) => updateTimeline(Number(e.target.value), true));
