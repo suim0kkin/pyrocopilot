@@ -1668,9 +1668,9 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
   <script src="./shared_data.js"></script>
-  <script src="./globe_engine.js?v=20261115f"></script>
-  <script src="./fire_analytics.js?v=20261115f"></script>
-  <script src="./static_copilot.js?v=20261115g"></script>
+  <script src="./globe_engine.js?v=20261115h"></script>
+  <script src="./fire_analytics.js?v=20261115h"></script>
+  <script src="./static_copilot.js?v=20261115h"></script>
   <script>
     (function () {
       const data = window.FIRMS_DATA;
@@ -1800,8 +1800,8 @@
           selectRegion(exactMacro);
           return;
         }
-        aiDrawer?.classList.add('open');
-        aiTrigger?.setAttribute('aria-expanded', 'true');
+        aiDrawer?.classList.remove('hidden');
+        aiToggleBtn?.setAttribute('aria-pressed', 'true');
         handlePrompt(q);
       }
 
@@ -2307,7 +2307,7 @@
           weekly.length = 0;
           weekly.push(...merged);
           rebuildTimelineControls();
-          updateTimeline(maxIdx, false);
+          updateTimeline(maxIdx, true);
         })
         .catch(() => {});
 
@@ -2353,28 +2353,29 @@
           ? Math.floor((dt - new Date(Date.UTC(dt.getUTCFullYear(), 0, 0))) / 86400000)
           : 200;
         const seasonPhase = ((doy - 195) / 365.25) * Math.PI * 2;
-        const vScale = wItem && wItem.v ? Math.max(0.25, Math.min(2.2, wItem.v / 1800000)) : 1.0;
-        const seed = (doy * 37 + (Number(String(weekDateStr).slice(0, 4)) || 2023) * 13) % 97;
+        const vScale = wItem && wItem.v ? Math.max(0.35, Math.min(2.6, wItem.v / 1600000)) : 1.0;
+        const yrNum = Number(String(weekDateStr).slice(0, 4)) || 2023;
+        const seed = Math.abs(Math.imul(doy * 131 + yrNum * 997, 2654435761));
         const out = [];
         const baseGrid = data.grid || [];
         for (let i = 0; i < baseGrid.length; i++) {
           const row = baseGrid[i];
           const lat = row[0];
           const lon = row[1];
-          const hemiWave = 1.0 + 0.55 * Math.cos(seasonPhase) * (lat >= 0 ? 1 : -0.85);
-          const lonWave = 0.75 + 0.5 * Math.sin(((lon + seed * 3.7) * Math.PI) / 90);
-          const gate = ((i * 31 + seed) % 10) / 10;
-          if (gate > 0.42 * hemiWave) continue;
-          const mult = Math.max(0.08, hemiWave * lonWave * vScale * 0.045);
-          out.push([lat, lon, Math.round(row[2] * mult), Math.round(row[3] * mult)]);
+          const hemiWave = Math.max(0.15, 1.0 + 0.72 * Math.cos(seasonPhase) * (lat >= 0 ? 1 : -0.9));
+          const lonWave = 0.4 + 0.6 * Math.sin(((lon * 2.3 + (seed % 360)) * Math.PI) / 180);
+          const cellHash = ((Math.imul(i + 1, 747796405) ^ seed) >>> 0) % 1000;
+          if (cellHash > 110 * hemiWave * lonWave) continue;
+          const mult = Math.max(0.12, hemiWave * lonWave * vScale * 0.16);
+          out.push([lat, lon, Math.round(row[2] * mult + 180), Math.round(row[3] * mult + 180)]);
         }
         return out;
       }
 
-      // Preload the most recent year's weekly grid in background for instant response
+      // Preload recent years' weekly grids in background for instant slider scrubbing
       if (weekly.length) {
         const lastYr = String(weekly[weekly.length - 1].d || '').slice(0, 4);
-        if (lastYr) setTimeout(() => { ensureWeeklyYearGrid(lastYr); }, 1000);
+        if (lastYr) ensureWeeklyYearGrid(lastYr);
       }
 
       function syncYearPills(yearStr) {
@@ -2397,20 +2398,21 @@
         if (!yearStr) return;
         syncYearPills(yearStr);
         ensureSpatialLayerVisible();
-        // If year grid is not yet in memory cache, immediately render synthesized weekly frame so slider never feels stuck
-        if (!weeklyGridCache.has(yearStr)) {
+        const cachedMap = weeklyGridCache.get(yearStr);
+        if (cachedMap && Array.isArray(cachedMap[weekDateStr]) && cachedMap[weekDateStr].length > 0) {
           globe.setTimeFactor(1.0);
-          globe.setGridData(synthesizeWeeklyGridFallback(weekDateStr), 'weekly');
+          globe.setGridData(cachedMap[weekDateStr], 'weekly', weekDateStr);
+          return;
         }
+        // Immediately render synthesized weekly frame so slider updates points on every drag frame
+        globe.setTimeFactor(1.0);
+        globe.setGridData(synthesizeWeeklyGridFallback(weekDateStr), 'weekly', weekDateStr);
         const reqId = ++latestWeekRequestId;
         const weekMap = await ensureWeeklyYearGrid(yearStr);
         if (reqId !== latestWeekRequestId) return;
         if (weekMap && Array.isArray(weekMap[weekDateStr]) && weekMap[weekDateStr].length > 0) {
           globe.setTimeFactor(1.0);
-          globe.setGridData(weekMap[weekDateStr], 'weekly');
-        } else if (!weeklyGridCache.has(yearStr)) {
-          globe.setTimeFactor(1.0);
-          globe.setGridData(synthesizeWeeklyGridFallback(weekDateStr), 'weekly');
+          globe.setGridData(weekMap[weekDateStr], 'weekly', weekDateStr);
         }
       }
 
@@ -2501,7 +2503,7 @@
         }
       }
 
-      updateTimeline(maxIdx, false);
+      updateTimeline(maxIdx, true);
 
       timeSlider.addEventListener('input', (e) => updateTimeline(Number(e.target.value), true));
       timeSlider.addEventListener('change', (e) => updateTimeline(Number(e.target.value), true));
