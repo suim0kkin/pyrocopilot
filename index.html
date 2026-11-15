@@ -527,9 +527,10 @@
     .timeline-dock {
       position: fixed;
       inset-block-end: 40px;
-      inset-inline-start: 50%;
-      transform: translateX(-50%);
-      inline-size: min(740px, calc(100% - 36px));
+      inset-inline-start: 396px;
+      inset-inline-end: 190px;
+      transform: none;
+      inline-size: auto;
       background: rgba(30, 31, 32, 0.94);
       border: 1px solid var(--ge-border);
       border-radius: 20px;
@@ -546,7 +547,7 @@
     .timeline-dock.hidden {
       opacity: 0;
       pointer-events: none;
-      transform: translate(-50%, 20px);
+      transform: translateY(20px);
     }
 
     .tl-row {
@@ -862,6 +863,7 @@
 
     @media (max-width: 980px) {
       .earth-controls { inset-block-end: 210px; }
+      .timeline-dock { inset-inline-start: 18px; inset-inline-end: 18px; }
     }
 
     /* Right Slide-Over Analytics Workspace Drawer (Design 4 Material 3 Dark) */
