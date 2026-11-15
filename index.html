@@ -528,23 +528,25 @@
       position: fixed;
       inset-block-end: 40px;
       inset-inline-start: 396px;
-      inset-inline-end: 190px;
+      inset-inline-end: 184px;
       transform: none;
       inline-size: auto;
       background: rgba(30, 31, 32, 0.94);
       border: 1px solid var(--ge-border);
       border-radius: 20px;
       backdrop-filter: blur(16px);
-      padding: 8px 16px;
+      padding: 10px 18px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
       z-index: 25;
-      transition: opacity 160ms ease, transform 160ms ease;
+      transition: opacity 160ms ease, transform 160ms ease, inset-inline-start 200ms ease;
     }
 
-    .tl-top-controls, .tl-year-ticks, .tl-year-pills, .tl-date-search { display: none !important; }
+    .ai-drawer.hidden ~ .timeline-dock {
+      inset-inline-start: 18px;
+    }
 
     .timeline-dock.hidden {
       opacity: 0;
@@ -612,62 +614,6 @@
       flex: 0 0 auto;
     }
 
-    .tl-top-controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .tl-year-pills {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .tl-year-pill {
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--ge-border-subtle);
-      background: var(--ge-surface-high);
-      color: var(--ge-text-muted);
-      font-family: var(--font-mono);
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .tl-year-pill:hover {
-      background: var(--ge-surface-hover);
-      color: var(--ge-text);
-    }
-
-    .tl-year-pill[aria-pressed="true"] {
-      background: var(--ge-accent-container);
-      color: var(--ge-accent);
-      border-color: var(--ge-accent);
-      font-weight: 600;
-    }
-
-    .tl-date-search {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .tl-date-input {
-      background: var(--ge-surface-high);
-      color: var(--ge-text);
-      border: 1px solid var(--ge-border);
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color-scheme: dark;
-    }
-
     .tl-slider-wrap {
       flex: 0 0 auto;
       inline-size: 100%;
@@ -676,49 +622,6 @@
       flex-direction: column;
       gap: 4px;
       padding-inline: 2px;
-    }
-
-    .tl-year-ticks {
-      position: relative;
-      block-size: 16px;
-      inline-size: 100%;
-      margin-block-start: 2px;
-    }
-
-    .tl-year-tick {
-      position: absolute;
-      inset-block-start: 0;
-      transform: translateX(-50%);
-      border: 0;
-      background: transparent;
-      color: var(--ge-text-muted);
-      font-family: var(--font-mono);
-      font-size: 10.5px;
-      padding: 0 2px;
-      cursor: pointer;
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      line-height: 1;
-    }
-
-    .tl-year-tick::before {
-      content: "";
-      display: block;
-      inline-size: 1px;
-      block-size: 5px;
-      background: var(--ge-border);
-      margin-block-end: 2px;
-    }
-
-    .tl-year-tick:hover,
-    .tl-year-tick.active {
-      color: var(--ge-accent);
-    }
-
-    .tl-year-tick.active::before {
-      background: var(--ge-accent);
-      block-size: 7px;
     }
 
     /* Blue-to-Red Heat Legend Bar */
@@ -1518,20 +1421,10 @@
     </div>
   </aside>
 
-  <!-- Bottom Timeline Bar + Year Dividers + Date Search + Blue-to-Red Thermal Scale -->
+  <!-- Bottom Timeline Bar + Blue-to-Red Thermal Scale -->
   <div id="timelineDock" class="timeline-dock" role="region" aria-label="Timeline and Thermal Scale">
-    <div class="tl-top-controls">
-      <div id="tlYearPills" class="tl-year-pills" role="group" aria-label="Filter Earth Grid by Year">
-        <button class="tl-year-pill" type="button" data-year="all" aria-pressed="true">All</button>
-      </div>
-      <form id="tlDateForm" class="tl-date-search">
-        <input id="tlDateSearch" class="tl-date-input" type="date" min="2000-11-01" max="2025-12-31" aria-label="Jump to date" />
-        <button class="tl-year-pill" type="submit">Go</button>
-      </form>
-    </div>
     <div class="tl-slider-wrap">
       <input id="timeSlider" class="tl-slider" type="range" min="0" max="1" value="0" aria-label="Weekly Timeline" />
-      <div id="tlYearTicks" class="tl-year-ticks" aria-label="Year Dividers"></div>
     </div>
     <div class="tl-row">
       <div class="tl-transport-group">
@@ -2256,7 +2149,7 @@
 
       initByokUi();
 
-      // Timeline Bar linked to FIRMS_DATA.weekly + /data/spatial_grid_1deg_yearly.json
+      // Timeline Bar linked to FIRMS_DATA.weekly + /data/weekly_grid/*.json
       const timeSlider = document.getElementById('timeSlider');
       const timeLabel = document.getElementById('timeLabel');
       const playBtn = document.getElementById('playBtn');
@@ -2264,10 +2157,6 @@
       const playText = document.getElementById('playText');
       const timelineDock = document.getElementById('timelineDock');
       const timelineToggleBtn = document.getElementById('timelineToggleBtn');
-      const tlYearPills = document.getElementById('tlYearPills');
-      const tlYearTicks = document.getElementById('tlYearTicks');
-      const tlDateSearch = document.getElementById('tlDateSearch');
-      const tlDateForm = document.getElementById('tlDateForm');
 
       let maxIdx = Math.max(0, weekly.length - 1);
       timeSlider.max = String(maxIdx);
@@ -2275,44 +2164,10 @@
 
       let playing = false;
       let playTimer = null;
-      let yearStarts = [];
 
       function rebuildTimelineControls() {
         maxIdx = Math.max(0, weekly.length - 1);
         timeSlider.max = String(maxIdx);
-        yearStarts = [];
-        let prevYr = null;
-        weekly.forEach((w, idx) => {
-          const yr = String(w.d || '').slice(0, 4);
-          if (yr && yr !== prevYr) {
-            yearStarts.push({ year: yr, idx });
-            prevYr = yr;
-          }
-        });
-        tlYearPills.innerHTML = '<button class="tl-year-pill" type="button" data-year="all" aria-pressed="true">All</button>';
-        tlYearTicks.innerHTML = '';
-        yearStarts.forEach(({ year, idx }) => {
-          const pill = document.createElement('button');
-          pill.className = 'tl-year-pill';
-          pill.type = 'button';
-          pill.dataset.year = year;
-          pill.setAttribute('aria-pressed', 'false');
-          pill.textContent = year;
-          tlYearPills.appendChild(pill);
-
-          const tick = document.createElement('button');
-          tick.className = 'tl-year-tick';
-          tick.type = 'button';
-          tick.dataset.year = year;
-          tick.textContent = year;
-          tick.style.insetInlineStart = `${maxIdx > 0 ? (idx / maxIdx) * 100 : 0}%`;
-          tick.title = `Jump to ${year}`;
-          tick.addEventListener('click', () => selectTimelineYear(year, true));
-          tlYearTicks.appendChild(tick);
-        });
-        if (weekly.length && tlDateSearch) {
-          tlDateSearch.min = weekly[0].d || '2000-01-01';
-        }
       }
 
       rebuildTimelineControls();
@@ -2333,11 +2188,15 @@
           weekly.length = 0;
           weekly.push(...merged);
           rebuildTimelineControls();
-          updateTimeline(maxIdx, true);
+          const curLayerBtn = layerPopover.querySelector('.pop-item[aria-current="true"]');
+          if (curLayerBtn?.dataset.layer === 'legacy') {
+            jumpTimelineToDate('2017-08-07', { layer: null, showDock: true });
+          } else {
+            updateTimeline(maxIdx, true);
+          }
         })
         .catch(() => {});
 
-      let activeYearFilter = 'all';
       const weeklyGridCache = new Map();
       const weeklyGridPromises = new Map();
       let latestWeekRequestId = 0;
@@ -2404,13 +2263,6 @@
         if (lastYr) ensureWeeklyYearGrid(lastYr);
       }
 
-      function syncYearPills(yearStr) {
-        activeYearFilter = yearStr;
-        tlYearPills.querySelectorAll('.tl-year-pill').forEach((b) => {
-          b.setAttribute('aria-pressed', String(b.dataset.year === yearStr));
-        });
-      }
-
       function ensureSpatialLayerVisible() {
         const curLayerBtn = layerPopover.querySelector('.pop-item[aria-current="true"]');
         const curLayer = curLayerBtn ? curLayerBtn.dataset.layer : 'viirs';
@@ -2422,7 +2274,6 @@
       async function applyWeekSpatialGrid(weekDateStr) {
         const yearStr = String(weekDateStr || '').slice(0, 4);
         if (!yearStr) return;
-        syncYearPills(yearStr);
         ensureSpatialLayerVisible();
         const cachedMap = weeklyGridCache.get(yearStr);
         if (cachedMap && Array.isArray(cachedMap[weekDateStr]) && cachedMap[weekDateStr].length > 0) {
@@ -2442,32 +2293,6 @@
         }
       }
 
-      function selectTimelineYear(yearStr, jumpSlider) {
-        if (yearStr === 'all') {
-          latestWeekRequestId++;
-          syncYearPills('all');
-          ensureSpatialLayerVisible();
-          globe.setTimeFactor(1.0);
-          globe.setGridData(data.grid, 'all');
-          return;
-        }
-        const found = yearStarts.find((y) => y.year === yearStr);
-        if (jumpSlider && found) {
-          updateTimeline(found.idx, true);
-        } else {
-          syncYearPills(yearStr);
-          const curItem = weekly[Number(timeSlider.value)];
-          if (curItem && curItem.d) applyWeekSpatialGrid(curItem.d);
-        }
-      }
-
-      tlYearPills.addEventListener('click', (e) => {
-        const btn = e.target.closest('.tl-year-pill');
-        if (btn && btn.dataset.year) {
-          selectTimelineYear(btn.dataset.year, true);
-        }
-      });
-
       function jumpTimelineToDate(targetDateStr, opts = {}) {
         const { layer = 'viirs', showDock = true } = opts;
         if (!weekly.length) return;
@@ -2484,8 +2309,8 @@
             playTimer = null;
           }
         }
-        if (layer && ['viirs', 'modis', 'gap'].includes(layer)) {
-          const labelMap = { viirs: 'VIIRS', modis: 'MODIS', gap: 'Bias Ratio' };
+        if (layer && ['viirs', 'modis', 'gap', 'legacy'].includes(layer)) {
+          const labelMap = { viirs: 'VIIRS', modis: 'MODIS', gap: 'Bias Ratio', legacy: '過去の統合予測' };
           setActiveLayer(layer, labelMap[layer] || layer);
         }
         const s = String(targetDateStr || '').trim();
@@ -2508,22 +2333,12 @@
         updateTimeline(bestIdx, true);
       }
 
-      tlDateForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (tlDateSearch.value) jumpTimelineToDate(tlDateSearch.value, { showDock: false });
-      });
-
       function updateTimeline(idx, syncSpatial = true) {
         if (!weekly.length) return;
         const clamped = Math.max(0, Math.min(maxIdx, idx));
         timeSlider.value = String(clamped);
         const item = weekly[clamped];
         timeLabel.textContent = item.d || `Week ${clamped + 1}`;
-        if (item.d && tlDateSearch) tlDateSearch.value = item.d;
-        const curYr = String(item.d || '').slice(0, 4);
-        tlYearTicks.querySelectorAll('.tl-year-tick').forEach((t) => {
-          t.classList.toggle('active', t.dataset.year === curYr);
-        });
         if (syncSpatial && item.d) {
           applyWeekSpatialGrid(item.d);
         }
