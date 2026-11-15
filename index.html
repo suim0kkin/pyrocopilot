@@ -551,22 +551,32 @@
 
     .tl-row {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 10px;
+      justify-content: space-between;
+      gap: 8px;
+      inline-size: 100%;
+    }
+
+    .tl-transport-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
     }
 
     .tl-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      block-size: 40px;
-      padding: 0 14px;
+      gap: 4px;
+      block-size: 32px;
+      padding: 0 11px;
       border-radius: 999px;
       border: 1px solid var(--ge-border-subtle);
       background: var(--ge-surface-high);
       color: var(--ge-text);
       font-family: var(--font-sans);
-      font-size: 14.5px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
       flex: 0 0 auto;
@@ -580,20 +590,23 @@
     }
 
     .tl-slider {
-      flex: 1 1 auto;
-      min-inline-size: 0;
-      block-size: 8px;
+      display: block;
+      inline-size: 100%;
+      width: 100%;
+      block-size: 20px;
+      margin: 0;
       accent-color: var(--ge-accent-strong);
       cursor: pointer;
     }
 
     .tl-date {
       font-family: var(--font-mono);
-      font-size: 15px;
+      font-size: 13.5px;
       font-weight: 600;
       color: var(--ge-accent);
-      min-inline-size: 105px;
+      min-inline-size: 92px;
       text-align: right;
+      flex: 0 0 auto;
     }
 
     .tl-top-controls {
@@ -653,17 +666,20 @@
     }
 
     .tl-slider-wrap {
-      flex: 1 1 auto;
-      min-inline-size: 0;
+      flex: 0 0 auto;
+      inline-size: 100%;
+      width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
+      padding-inline: 2px;
     }
 
     .tl-year-ticks {
       position: relative;
       block-size: 16px;
       inline-size: 100%;
+      margin-block-start: 2px;
     }
 
     .tl-year-tick {
@@ -700,9 +716,6 @@
     .tl-year-tick.active::before {
       background: var(--ge-accent);
       block-size: 7px;
-    }
-      text-align: end;
-      flex: 0 0 auto;
     }
 
     /* Blue-to-Red Heat Legend Bar */
@@ -855,7 +868,7 @@
     .analytics-drawer {
       position: fixed;
       inset-block-start: 82px;
-      inset-block-end: 46px;
+      inset-block-end: 196px;
       inset-inline-end: 16px;
       inline-size: min(620px, calc(100vw - 32px));
       background: rgba(30, 31, 32, 0.96);
@@ -1291,6 +1304,10 @@
       <span class="material-symbols-outlined" aria-hidden="true">agriculture</span>
       <span>● Swidden / Persistent (Parquet)</span>
     </button>
+    <button class="pop-item" data-layer="legacy" data-label="過去の統合予測" aria-current="false" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">history</span>
+      <span>● 過去の統合予測 (2000–2017)</span>
+    </button>
   </div>
 
   <!-- Region Popover -->
@@ -1451,7 +1468,7 @@
           <div class="panel-controls">
             <span style="font-size:13px;color:var(--ge-text-muted);">Filter Period</span>
             <select id="trendYearSelect" class="ge-select" aria-label="Filter trend year">
-              <option value="all">All Years (2018–2025)</option>
+              <option value="all">All Years (2000–2025)</option>
             </select>
           </div>
           <div id="trendKpis" class="kpi-grid"></div>
@@ -1504,27 +1521,29 @@
         <button class="tl-year-pill" type="button" data-year="all" aria-pressed="true">All</button>
       </div>
       <form id="tlDateForm" class="tl-date-search">
-        <input id="tlDateSearch" class="tl-date-input" type="date" min="2018-03-26" max="2025-12-31" aria-label="Jump to date" />
+        <input id="tlDateSearch" class="tl-date-input" type="date" min="2000-11-01" max="2025-12-31" aria-label="Jump to date" />
         <button class="tl-year-pill" type="submit">Go</button>
       </form>
     </div>
+    <div class="tl-slider-wrap">
+      <input id="timeSlider" class="tl-slider" type="range" min="0" max="1" value="0" aria-label="Weekly Timeline" />
+      <div id="tlYearTicks" class="tl-year-ticks" aria-label="Year Dividers"></div>
+    </div>
     <div class="tl-row">
-      <button id="playBtn" class="tl-btn primary" type="button">
-        <span id="playIcon" class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
-        <span id="playText">Play</span>
-      </button>
-      <button id="prevBtn" class="tl-btn" type="button">
-        <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
-        <span>Prev</span>
-      </button>
-      <div class="tl-slider-wrap">
-        <input id="timeSlider" class="tl-slider" type="range" min="0" max="1" value="0" aria-label="Weekly Timeline" />
-        <div id="tlYearTicks" class="tl-year-ticks" aria-label="Year Dividers"></div>
+      <div class="tl-transport-group">
+        <button id="playBtn" class="tl-btn primary" type="button">
+          <span id="playIcon" class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+          <span id="playText">Play</span>
+        </button>
+        <button id="prevBtn" class="tl-btn" type="button">
+          <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+          <span>Prev</span>
+        </button>
+        <button id="nextBtn" class="tl-btn" type="button">
+          <span>Next</span>
+          <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+        </button>
       </div>
-      <button id="nextBtn" class="tl-btn" type="button">
-        <span>Next</span>
-        <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-      </button>
       <span id="timeLabel" class="tl-date">--</span>
     </div>
     <div class="heat-scale-row">
@@ -1903,6 +1922,9 @@
             } else {
               handlePrompt('アマゾンの焼畑と天気を調べて範囲を拡大して解説して');
             }
+          } else if (layer === 'legacy') {
+            setActiveLayer(layer, label);
+            jumpTimelineToDate('2017-08-07', { layer: null, showDock: true });
           } else {
             setActiveLayer(layer, label);
           }
