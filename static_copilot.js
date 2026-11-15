@@ -342,8 +342,9 @@
     };
 
     const swiddenPoints = (tel.swidden_samples || [])
+      .map((p) => (Array.isArray(p) ? { lat: p[0], lon: p[1], t: p[2], kind: 'swidden' } : p))
       .filter((p) => loc.is_global || (p.lat >= latMin && p.lat <= latMax && p.lon >= lonMin && p.lon <= lonMax))
-      .slice(0, 320);
+      .slice(0, 120000);
 
     let peakDate = temporal.date || '2023-08-14';
     if (Array.isArray(globalWeekly) && temporal.year) {

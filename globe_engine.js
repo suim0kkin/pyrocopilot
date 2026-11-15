@@ -218,12 +218,12 @@
         let lat = baseLat;
         let lon = baseLon;
         if (isWeekly) {
-          // Sub-distribute 2-deg grid centroids using this week's exact FRP + date seed so points shift organically each week
+          // Sub-distribute 0.20-deg grid centroids using this week's exact FRP + date seed
           const sig = Math.imul(Math.round(baseLat * 10) * 73856093 ^ Math.round(baseLon * 10) * 19349663 ^ Math.round(v + m * 1.7), 2654435761) ^ wSeed;
           const u1 = ((sig & 0xffff) / 65535) - 0.5;
           const u2 = (((sig >>> 16) & 0xffff) / 65535) - 0.5;
-          lat = Math.max(-84, Math.min(84, baseLat + u1 * 1.55));
-          lon = baseLon + u2 * 1.55;
+          lat = Math.max(-84, Math.min(84, baseLat + u1 * 0.14));
+          lon = baseLon + u2 * 0.14;
         }
 
         const phi = toRad(lat);
@@ -509,9 +509,10 @@
         drawContinents(cx, cy, r, sinC, cosC, cLon);
       }
 
-      // 2. Biome terrain relief (always drawn from full land grid) & thermal fire activity (Blue -> Red)
+      // 2. Biome terrain relief (stride-sampled for 60fps when grid is dense) & thermal fire activity (Blue -> Red)
       const patchSize = Math.max(2.2, r * 0.019);
-      for (let i = 0; i < baseBiomePoints.length; i++) {
+      const biomeStep = baseBiomePoints.length > 30000 ? Math.ceil(baseBiomePoints.length / 22000) : 1;
+      for (let i = 0; i < baseBiomePoints.length; i += biomeStep) {
         const bp = baseBiomePoints[i];
         const p = project(bp.sinLat, bp.cosLat, bp.lam, cLat, cLon, cx, cy, r);
         if (!p) continue;
@@ -543,9 +544,10 @@
           customRender.push({ cp, p });
         }
         customRender.sort((a, b) => a.cp.t - b.cp.t);
+        const fastCustom = customRender.length > 8000;
         for (let i = 0; i < customRender.length; i++) {
           const { cp, p } = customRender[i];
-          const sz = Math.min(6.4, 1.8 + cp.t * 4.0) * Math.sqrt(zoom);
+          const sz = Math.min(6.4, (fastCustom ? 1.15 : 1.8) + cp.t * (fastCustom ? 2.2 : 4.0)) * Math.sqrt(zoom);
           if (opts.layer === 'swidden' && cp.kind) {
             if (cp.kind === 'swidden') ctx.fillStyle = 'rgba(255, 145, 0, 0.94)';
             else if (cp.kind === 'industrial') ctx.fillStyle = 'rgba(224, 64, 251, 0.94)';
@@ -553,22 +555,31 @@
           } else {
             ctx.fillStyle = thermalBlueToRed(cp.t, 1.0);
           }
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
-          ctx.fill();
+          if (fastCustom) {
+            ctx.fillRect(p.x - sz, p.y - sz, sz * 2, sz * 2);
+          } else {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       } else {
         // Sort thermal points so high-heat red points render on top of low-heat blue points
         hotPoints.sort((a, b) => a.val - b.val);
+        const fastHot = hotPoints.length > 10000;
 
         for (let i = 0; i < hotPoints.length; i++) {
           const { pt, p, val } = hotPoints[i];
           const t = Math.min(1, Math.log10(Math.max(1, val) / 40 + 1) / gridLogDenom);
-          const sz = Math.min(6.8, (1.35 + t * 3.4) * pointSizeBoost) * Math.sqrt(zoom);
+          const sz = Math.min(6.8, ((fastHot ? 0.95 : 1.35) + t * (fastHot ? 2.2 : 3.4)) * pointSizeBoost) * Math.sqrt(zoom);
           ctx.fillStyle = colorForPoint(pt, opts.layer, val);
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
-          ctx.fill();
+          if (fastHot) {
+            ctx.fillRect(p.x - sz, p.y - sz, sz * 2, sz * 2);
+          } else {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
 
@@ -755,33 +766,35 @@
       },
       setGridData(rows, mode, weekKey) {
         if (mode === 'weekly') {
-          gridLogDenom = 1.85;
-          minValThreshold = 135;
-          pointSizeBoost = 1.45;
+          gridLogDenom = 1.45;
+          minValThreshold = 8;
+          pointSizeBoost = 1.15;
         } else if (mode === true || mode === 'yearly') {
-          gridLogDenom = 2.25;
-          minValThreshold = 35;
+          gridLogDenom = 1.9;
+          minValThreshold = 10;
           pointSizeBoost = 1.05;
         } else {
-          gridLogDenom = 3.1;
-          minValThreshold = 35;
+          gridLogDenom = 2.6;
+          minValThreshold = 5;
           pointSizeBoost = 1.0;
         }
         points = buildPoints(rows, mode, weekKey);
       },
       setCustomPoints(list) {
         customPoints = (list || []).map((item) => {
-          const lat = Number(item.lat) || 0;
-          const lon = Number(item.lon) || 0;
+          const isArr = Array.isArray(item);
+          const lat = Number(isArr ? item[0] : item.lat) || 0;
+          const lon = Number(isArr ? item[1] : item.lon) || 0;
+          const tVal = Number(isArr ? item[2] : item.t) || 0;
           const phi = toRad(lat);
           const lam = toRad(lon);
           return {
             lat,
             lon,
-            t: Math.max(0, Math.min(1, Number(item.t) || 0)),
-            kind: item.kind || null,
-            days_per_yr: item.days_per_yr,
-            years_frac: item.years_frac,
+            t: Math.max(0, Math.min(1, tVal)),
+            kind: (isArr ? 'swidden' : item.kind) || null,
+            days_per_yr: isArr ? undefined : item.days_per_yr,
+            years_frac: isArr ? undefined : item.years_frac,
             cosLat: Math.cos(phi),
             sinLat: Math.sin(phi),
             lam,
