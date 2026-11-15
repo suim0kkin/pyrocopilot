@@ -249,15 +249,17 @@
     }
   }
 
+  const DEFAULT_GEMINI_API_KEY = 'AQ.Ab8RN6I3UgEZEX4uUO3-0F36R3ehvFTh96Hqi6ZebOMiWyn4QQ';
+
   async function getConfig(localKey) {
     const tel = await loadJsonOnce('./data/static_telemetry.json', 'tel');
-    const saved = String(localKey || localStorage.getItem('firms_gemini_api_key') || '').trim();
+    const saved = String(localKey || localStorage.getItem('firms_gemini_api_key') || DEFAULT_GEMINI_API_KEY).trim();
     return {
       ok: true,
       static_mode: true,
       has_key: Boolean(saved),
       masked_key: maskKey(saved),
-      default_key: '',
+      default_key: DEFAULT_GEMINI_API_KEY,
       model: localStorage.getItem('firms_gemini_model') || MODELS_CASCADE[0],
       models: MODELS_CASCADE,
       parquets: tel?.parquet_meta || [],
@@ -383,7 +385,7 @@
     let usedModel = 'static-telemetry-fallback';
     let latencyMs = 0;
 
-    const cleanKey = String(apiKey || localStorage.getItem('firms_gemini_api_key') || '').trim();
+    const cleanKey = String(apiKey || localStorage.getItem('firms_gemini_api_key') || DEFAULT_GEMINI_API_KEY).trim();
     if (cleanKey) {
       const payload = {
         systemInstruction: { parts: [{ text: 'You are an expert NASA FIRMS wildfire, 7-day weather risk, and swidden agriculture analyst. Reply in JSON {"reply": "..."} in the same language as the user prompt (3-5 concise sentences citing only the provided telemetry numbers, no emojis).' }] },
