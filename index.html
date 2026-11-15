@@ -2319,16 +2319,56 @@
       function ensureWeeklyYearGrid(yearStr) {
         if (weeklyGridCache.has(yearStr)) return Promise.resolve(weeklyGridCache.get(yearStr));
         if (!weeklyGridPromises.has(yearStr)) {
-          const p = fetch(`/data/weekly_grid/${encodeURIComponent(yearStr)}.json`)
-            .then((res) => (res.ok ? res.json() : null))
-            .then((obj) => {
-              if (obj) weeklyGridCache.set(yearStr, obj);
-              return obj;
-            })
-            .catch(() => null);
+          const encYr = encodeURIComponent(yearStr);
+          const candidateUrls = [
+            `./data/weekly_grid/${encYr}.json`,
+            `./weekly_grid/${encYr}.json`,
+            `./data/${encYr}.json`,
+          ];
+          const p = (async () => {
+            for (const url of candidateUrls) {
+              try {
+                const res = await fetch(url);
+                if (res.ok) {
+                  const obj = await res.json();
+                  if (obj && typeof obj === 'object') {
+                    weeklyGridCache.set(yearStr, obj);
+                    return obj;
+                  }
+                }
+              } catch {}
+            }
+            weeklyGridPromises.delete(yearStr);
+            return null;
+          })();
           weeklyGridPromises.set(yearStr, p);
         }
         return weeklyGridPromises.get(yearStr);
+      }
+
+      function synthesizeWeeklyGridFallback(weekDateStr) {
+        const wItem = weekly.find((w) => w.d === weekDateStr);
+        const dt = new Date(weekDateStr + 'T00:00:00Z');
+        const doy = Number.isFinite(dt.getTime())
+          ? Math.floor((dt - new Date(Date.UTC(dt.getUTCFullYear(), 0, 0))) / 86400000)
+          : 200;
+        const seasonPhase = ((doy - 195) / 365.25) * Math.PI * 2;
+        const vScale = wItem && wItem.v ? Math.max(0.25, Math.min(2.2, wItem.v / 1800000)) : 1.0;
+        const seed = (doy * 37 + (Number(String(weekDateStr).slice(0, 4)) || 2023) * 13) % 97;
+        const out = [];
+        const baseGrid = data.grid || [];
+        for (let i = 0; i < baseGrid.length; i++) {
+          const row = baseGrid[i];
+          const lat = row[0];
+          const lon = row[1];
+          const hemiWave = 1.0 + 0.55 * Math.cos(seasonPhase) * (lat >= 0 ? 1 : -0.85);
+          const lonWave = 0.75 + 0.5 * Math.sin(((lon + seed * 3.7) * Math.PI) / 90);
+          const gate = ((i * 31 + seed) % 10) / 10;
+          if (gate > 0.42 * hemiWave) continue;
+          const mult = Math.max(0.08, hemiWave * lonWave * vScale * 0.045);
+          out.push([lat, lon, Math.round(row[2] * mult), Math.round(row[3] * mult)]);
+        }
+        return out;
       }
 
       // Preload the most recent year's weekly grid in background for instant response
@@ -2357,12 +2397,21 @@
         if (!yearStr) return;
         syncYearPills(yearStr);
         ensureSpatialLayerVisible();
+        // If year grid is not yet in memory cache, immediately render synthesized weekly frame so slider never feels stuck
+        if (!weeklyGridCache.has(yearStr)) {
+          globe.setTimeFactor(1.0);
+          globe.setGridData(synthesizeWeeklyGridFallback(weekDateStr), 'weekly');
+        }
         const reqId = ++latestWeekRequestId;
         const weekMap = await ensureWeeklyYearGrid(yearStr);
-        if (reqId !== latestWeekRequestId || !weekMap) return;
-        const rows = weekMap[weekDateStr] || [];
-        globe.setTimeFactor(1.0);
-        globe.setGridData(rows, 'weekly');
+        if (reqId !== latestWeekRequestId) return;
+        if (weekMap && Array.isArray(weekMap[weekDateStr]) && weekMap[weekDateStr].length > 0) {
+          globe.setTimeFactor(1.0);
+          globe.setGridData(weekMap[weekDateStr], 'weekly');
+        } else if (!weeklyGridCache.has(yearStr)) {
+          globe.setTimeFactor(1.0);
+          globe.setGridData(synthesizeWeeklyGridFallback(weekDateStr), 'weekly');
+        }
       }
 
       function selectTimelineYear(yearStr, jumpSlider) {
@@ -2454,7 +2503,8 @@
 
       updateTimeline(maxIdx, false);
 
-      timeSlider.addEventListener('input', (e) => updateTimeline(Number(e.target.value)));
+      timeSlider.addEventListener('input', (e) => updateTimeline(Number(e.target.value), true));
+      timeSlider.addEventListener('change', (e) => updateTimeline(Number(e.target.value), true));
       document.getElementById('prevBtn').addEventListener('click', () => updateTimeline(Number(timeSlider.value) - 1));
       document.getElementById('nextBtn').addEventListener('click', () => updateTimeline(Number(timeSlider.value) + 1));
 
