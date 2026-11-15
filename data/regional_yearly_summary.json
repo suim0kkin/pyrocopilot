@@ -1,0 +1,642 @@
+[
+  {
+    "region": "Global",
+    "year": 2018,
+    "active_cells": 3879611,
+    "m_count": 3365490,
+    "v_count": 14854127,
+    "m_frp_sum": 157490302.8,
+    "v_frp_sum": 150945788.04,
+    "viirs_to_modis_ratio": 0.9584
+  },
+  {
+    "region": "Global",
+    "year": 2019,
+    "active_cells": 5374005,
+    "m_count": 4575172,
+    "v_count": 20720601,
+    "m_frp_sum": 198172856.97,
+    "v_frp_sum": 200292470.28,
+    "viirs_to_modis_ratio": 1.0107
+  },
+  {
+    "region": "Global",
+    "year": 2020,
+    "active_cells": 5440121,
+    "m_count": 4385199,
+    "v_count": 20158742,
+    "m_frp_sum": 186829368.92,
+    "v_frp_sum": 197717788.41,
+    "viirs_to_modis_ratio": 1.0583
+  },
+  {
+    "region": "Global",
+    "year": 2021,
+    "active_cells": 5140783,
+    "m_count": 4383584,
+    "v_count": 20051072,
+    "m_frp_sum": 208178898.33,
+    "v_frp_sum": 199675907.94,
+    "viirs_to_modis_ratio": 0.9592
+  },
+  {
+    "region": "Global",
+    "year": 2022,
+    "active_cells": 4925892,
+    "m_count": 3783136,
+    "v_count": 18010213,
+    "m_frp_sum": 155009908.31,
+    "v_frp_sum": 172766987.45,
+    "viirs_to_modis_ratio": 1.1146
+  },
+  {
+    "region": "Global",
+    "year": 2023,
+    "active_cells": 5373526,
+    "m_count": 4655268,
+    "v_count": 21249932,
+    "m_frp_sum": 222734853.4,
+    "v_frp_sum": 214730518.67,
+    "viirs_to_modis_ratio": 0.9641
+  },
+  {
+    "region": "Global",
+    "year": 2024,
+    "active_cells": 5698750,
+    "m_count": 4903299,
+    "v_count": 22783929,
+    "m_frp_sum": 207661687.58,
+    "v_frp_sum": 221351827.45,
+    "viirs_to_modis_ratio": 1.0659
+  },
+  {
+    "region": "Global",
+    "year": 2025,
+    "active_cells": 4990098,
+    "m_count": 3638503,
+    "v_count": 18103656,
+    "m_frp_sum": 150532369.5,
+    "v_frp_sum": 176096440.12,
+    "viirs_to_modis_ratio": 1.1698
+  },
+  {
+    "region": "Amazon",
+    "year": 2018,
+    "active_cells": 253321,
+    "m_count": 216106,
+    "v_count": 798834,
+    "m_frp_sum": 9239403.9,
+    "v_frp_sum": 9344519.1,
+    "viirs_to_modis_ratio": 1.0114
+  },
+  {
+    "region": "Amazon",
+    "year": 2019,
+    "active_cells": 335323,
+    "m_count": 391552,
+    "v_count": 1515199,
+    "m_frp_sum": 20699887.9,
+    "v_frp_sum": 18745310.52,
+    "viirs_to_modis_ratio": 0.9056
+  },
+  {
+    "region": "Amazon",
+    "year": 2020,
+    "active_cells": 375263,
+    "m_count": 417250,
+    "v_count": 1682077,
+    "m_frp_sum": 21599143.1,
+    "v_frp_sum": 21677616.67,
+    "viirs_to_modis_ratio": 1.0036
+  },
+  {
+    "region": "Amazon",
+    "year": 2021,
+    "active_cells": 296571,
+    "m_count": 319092,
+    "v_count": 1212835,
+    "m_frp_sum": 16792347.8,
+    "v_frp_sum": 15517762.28,
+    "viirs_to_modis_ratio": 0.9241
+  },
+  {
+    "region": "Amazon",
+    "year": 2022,
+    "active_cells": 366099,
+    "m_count": 401452,
+    "v_count": 1566793,
+    "m_frp_sum": 19111154.7,
+    "v_frp_sum": 18761495.34,
+    "viirs_to_modis_ratio": 0.9817
+  },
+  {
+    "region": "Amazon",
+    "year": 2023,
+    "active_cells": 362507,
+    "m_count": 377660,
+    "v_count": 1386218,
+    "m_frp_sum": 15916943.5,
+    "v_frp_sum": 15221737.98,
+    "viirs_to_modis_ratio": 0.9563
+  },
+  {
+    "region": "Amazon",
+    "year": 2024,
+    "active_cells": 370174,
+    "m_count": 652111,
+    "v_count": 2632572,
+    "m_frp_sum": 33982877.0,
+    "v_frp_sum": 30442470.91,
+    "viirs_to_modis_ratio": 0.8958
+  },
+  {
+    "region": "Amazon",
+    "year": 2025,
+    "active_cells": 219581,
+    "m_count": 189146,
+    "v_count": 705959,
+    "m_frp_sum": 7446564.9,
+    "v_frp_sum": 7672424.9,
+    "viirs_to_modis_ratio": 1.0303
+  },
+  {
+    "region": "North_America_Boreal",
+    "year": 2018,
+    "active_cells": 18406,
+    "m_count": 57543,
+    "v_count": 283947,
+    "m_frp_sum": 6837556.0,
+    "v_frp_sum": 4192098.65,
+    "viirs_to_modis_ratio": 0.6131
+  },
+  {
+    "region": "North_America_Boreal",
+    "year": 2019,
+    "active_cells": 18411,
+    "m_count": 67190,
+    "v_count": 288372,
+    "m_frp_sum": 7389169.8,
+    "v_frp_sum": 4129888.36,
+    "viirs_to_modis_ratio": 0.5589
+  },
+  {
+    "region": "North_America_Boreal",
+    "year": 2020,
+    "active_cells": 10912,
+    "m_count": 9610,
+    "v_count": 34428,
+    "m_frp_sum": 488685.6,
+    "v_frp_sum": 397283.13,
+    "viirs_to_modis_ratio": 0.813
+  },
+  {
+    "region": "North_America_Boreal",
+    "year": 2021,
+    "active_cells": 24776,
+    "m_count": 89441,
+    "v_count": 426891,
+    "m_frp_sum": 10023777.5,
+    "v_frp_sum": 6641931.33,
+    "viirs_to_modis_ratio": 0.6626
+  },
+  {
+    "region": "North_America_Boreal",
+    "year": 2022,
+    "active_cells": 17528,
+    "m_count": 56259,
+    "v_count": 241813,
+    "m_frp_sum": 5734926.4,
+    "v_frp_sum": 3961372.24,
+    "viirs_to_modis_ratio": 0.6907
+  },
+  {
+    "region": "North_America_Boreal",
+    "year": 2023,
+    "active_cells": 60507,
+    "m_count": 311473,
+    "v_count": 1613812,
+    "m_frp_sum": 39999158.11,
+    "v_frp_sum": 25435632.8,
+    "viirs_to_modis_ratio": 0.6359
+  },
+  {
+    "region": "North_America_Boreal",
+    "year": 2024,
+    "active_cells": 33194,
+    "m_count": 148707,
+    "v_count": 803090,
+    "m_frp_sum": 17049474.3,
+    "v_frp_sum": 11865895.68,
+    "viirs_to_modis_ratio": 0.696
+  },
+  {
+    "region": "North_America_Boreal",
+    "year": 2025,
+    "active_cells": 37322,
+    "m_count": 161760,
+    "v_count": 935195,
+    "m_frp_sum": 20385171.91,
+    "v_frp_sum": 14804901.2,
+    "viirs_to_modis_ratio": 0.7263
+  },
+  {
+    "region": "Siberia",
+    "year": 2018,
+    "active_cells": 75249,
+    "m_count": 199189,
+    "v_count": 775667,
+    "m_frp_sum": 14829530.69,
+    "v_frp_sum": 9018478.16,
+    "viirs_to_modis_ratio": 0.6081
+  },
+  {
+    "region": "Siberia",
+    "year": 2019,
+    "active_cells": 104397,
+    "m_count": 309783,
+    "v_count": 1322067,
+    "m_frp_sum": 16898225.69,
+    "v_frp_sum": 12004980.04,
+    "viirs_to_modis_ratio": 0.7104
+  },
+  {
+    "region": "Siberia",
+    "year": 2020,
+    "active_cells": 97940,
+    "m_count": 283002,
+    "v_count": 1193813,
+    "m_frp_sum": 16003726.9,
+    "v_frp_sum": 12210690.15,
+    "viirs_to_modis_ratio": 0.763
+  },
+  {
+    "region": "Siberia",
+    "year": 2021,
+    "active_cells": 95392,
+    "m_count": 398173,
+    "v_count": 1681780,
+    "m_frp_sum": 31813650.62,
+    "v_frp_sum": 18282260.03,
+    "viirs_to_modis_ratio": 0.5747
+  },
+  {
+    "region": "Siberia",
+    "year": 2022,
+    "active_cells": 73400,
+    "m_count": 142035,
+    "v_count": 664286,
+    "m_frp_sum": 7105506.21,
+    "v_frp_sum": 5740576.59,
+    "viirs_to_modis_ratio": 0.8079
+  },
+  {
+    "region": "Siberia",
+    "year": 2023,
+    "active_cells": 70832,
+    "m_count": 188044,
+    "v_count": 748648,
+    "m_frp_sum": 10837074.6,
+    "v_frp_sum": 6897596.07,
+    "viirs_to_modis_ratio": 0.6365
+  },
+  {
+    "region": "Siberia",
+    "year": 2024,
+    "active_cells": 69257,
+    "m_count": 218655,
+    "v_count": 1045079,
+    "m_frp_sum": 11857570.59,
+    "v_frp_sum": 9445251.08,
+    "viirs_to_modis_ratio": 0.7966
+  },
+  {
+    "region": "Siberia",
+    "year": 2025,
+    "active_cells": 56778,
+    "m_count": 101009,
+    "v_count": 456038,
+    "m_frp_sum": 6038202.4,
+    "v_frp_sum": 5104037.6,
+    "viirs_to_modis_ratio": 0.8453
+  },
+  {
+    "region": "Central_Africa",
+    "year": 2018,
+    "active_cells": 1391538,
+    "m_count": 1301587,
+    "v_count": 5292329,
+    "m_frp_sum": 51786167.8,
+    "v_frp_sum": 56184189.78,
+    "viirs_to_modis_ratio": 1.0849
+  },
+  {
+    "region": "Central_Africa",
+    "year": 2019,
+    "active_cells": 1742929,
+    "m_count": 1526558,
+    "v_count": 6373052,
+    "m_frp_sum": 57839492.3,
+    "v_frp_sum": 65182967.15,
+    "viirs_to_modis_ratio": 1.127
+  },
+  {
+    "region": "Central_Africa",
+    "year": 2020,
+    "active_cells": 1873040,
+    "m_count": 1576219,
+    "v_count": 6869035,
+    "m_frp_sum": 58666935.49,
+    "v_frp_sum": 69742746.46,
+    "viirs_to_modis_ratio": 1.1888
+  },
+  {
+    "region": "Central_Africa",
+    "year": 2021,
+    "active_cells": 1852078,
+    "m_count": 1587332,
+    "v_count": 6807846,
+    "m_frp_sum": 61241984.4,
+    "v_frp_sum": 69253517.82,
+    "viirs_to_modis_ratio": 1.1308
+  },
+  {
+    "region": "Central_Africa",
+    "year": 2022,
+    "active_cells": 1770636,
+    "m_count": 1454717,
+    "v_count": 6408255,
+    "m_frp_sum": 53040351.4,
+    "v_frp_sum": 64101778.96,
+    "viirs_to_modis_ratio": 1.2085
+  },
+  {
+    "region": "Central_Africa",
+    "year": 2023,
+    "active_cells": 1749730,
+    "m_count": 1500315,
+    "v_count": 6472252,
+    "m_frp_sum": 55692730.3,
+    "v_frp_sum": 66437804.02,
+    "viirs_to_modis_ratio": 1.1929
+  },
+  {
+    "region": "Central_Africa",
+    "year": 2024,
+    "active_cells": 2048565,
+    "m_count": 1726957,
+    "v_count": 7675703,
+    "m_frp_sum": 61697656.9,
+    "v_frp_sum": 77268001.61,
+    "viirs_to_modis_ratio": 1.2524
+  },
+  {
+    "region": "Central_Africa",
+    "year": 2025,
+    "active_cells": 1858786,
+    "m_count": 1411310,
+    "v_count": 6887161,
+    "m_frp_sum": 48633753.4,
+    "v_frp_sum": 69341382.07,
+    "viirs_to_modis_ratio": 1.4258
+  },
+  {
+    "region": "Southeast_Asia",
+    "year": 2018,
+    "active_cells": 207528,
+    "m_count": 100761,
+    "v_count": 486263,
+    "m_frp_sum": 3600080.3,
+    "v_frp_sum": 4794593.37,
+    "viirs_to_modis_ratio": 1.3318
+  },
+  {
+    "region": "Southeast_Asia",
+    "year": 2019,
+    "active_cells": 479190,
+    "m_count": 297084,
+    "v_count": 1528355,
+    "m_frp_sum": 10863168.09,
+    "v_frp_sum": 13132403.27,
+    "viirs_to_modis_ratio": 1.2089
+  },
+  {
+    "region": "Southeast_Asia",
+    "year": 2020,
+    "active_cells": 391828,
+    "m_count": 213142,
+    "v_count": 1168448,
+    "m_frp_sum": 7695223.1,
+    "v_frp_sum": 9621500.04,
+    "viirs_to_modis_ratio": 1.2503
+  },
+  {
+    "region": "Southeast_Asia",
+    "year": 2021,
+    "active_cells": 322253,
+    "m_count": 173457,
+    "v_count": 870528,
+    "m_frp_sum": 6044199.5,
+    "v_frp_sum": 7780243.16,
+    "viirs_to_modis_ratio": 1.2872
+  },
+  {
+    "region": "Southeast_Asia",
+    "year": 2022,
+    "active_cells": 254710,
+    "m_count": 104506,
+    "v_count": 613593,
+    "m_frp_sum": 2899537.3,
+    "v_frp_sum": 6058390.19,
+    "viirs_to_modis_ratio": 2.0894
+  },
+  {
+    "region": "Southeast_Asia",
+    "year": 2023,
+    "active_cells": 427932,
+    "m_count": 263271,
+    "v_count": 1281685,
+    "m_frp_sum": 8984829.5,
+    "v_frp_sum": 11159391.7,
+    "viirs_to_modis_ratio": 1.242
+  },
+  {
+    "region": "Southeast_Asia",
+    "year": 2024,
+    "active_cells": 379898,
+    "m_count": 198293,
+    "v_count": 1008524,
+    "m_frp_sum": 6371561.8,
+    "v_frp_sum": 9209240.41,
+    "viirs_to_modis_ratio": 1.4454
+  },
+  {
+    "region": "Southeast_Asia",
+    "year": 2025,
+    "active_cells": 293708,
+    "m_count": 148849,
+    "v_count": 740093,
+    "m_frp_sum": 4039172.2,
+    "v_frp_sum": 6467411.39,
+    "viirs_to_modis_ratio": 1.6012
+  },
+  {
+    "region": "Australia",
+    "year": 2018,
+    "active_cells": 140115,
+    "m_count": 293539,
+    "v_count": 1370879,
+    "m_frp_sum": 19752551.1,
+    "v_frp_sum": 15969779.84,
+    "viirs_to_modis_ratio": 0.8085
+  },
+  {
+    "region": "Australia",
+    "year": 2019,
+    "active_cells": 123227,
+    "m_count": 320480,
+    "v_count": 1602789,
+    "m_frp_sum": 24705448.08,
+    "v_frp_sum": 20638220.65,
+    "viirs_to_modis_ratio": 0.8354
+  },
+  {
+    "region": "Australia",
+    "year": 2020,
+    "active_cells": 98184,
+    "m_count": 134743,
+    "v_count": 727656,
+    "m_frp_sum": 7227688.3,
+    "v_frp_sum": 6929699.83,
+    "viirs_to_modis_ratio": 0.9588
+  },
+  {
+    "region": "Australia",
+    "year": 2021,
+    "active_cells": 116284,
+    "m_count": 171694,
+    "v_count": 811384,
+    "m_frp_sum": 8649146.7,
+    "v_frp_sum": 8220439.03,
+    "viirs_to_modis_ratio": 0.9504
+  },
+  {
+    "region": "Australia",
+    "year": 2022,
+    "active_cells": 109564,
+    "m_count": 159884,
+    "v_count": 823985,
+    "m_frp_sum": 8218289.1,
+    "v_frp_sum": 8384744.28,
+    "viirs_to_modis_ratio": 1.0203
+  },
+  {
+    "region": "Australia",
+    "year": 2023,
+    "active_cells": 162493,
+    "m_count": 395521,
+    "v_count": 1781447,
+    "m_frp_sum": 29455080.6,
+    "v_frp_sum": 21506412.45,
+    "viirs_to_modis_ratio": 0.7301
+  },
+  {
+    "region": "Australia",
+    "year": 2024,
+    "active_cells": 131854,
+    "m_count": 224812,
+    "v_count": 1064273,
+    "m_frp_sum": 13138889.8,
+    "v_frp_sum": 11539945.63,
+    "viirs_to_modis_ratio": 0.8783
+  },
+  {
+    "region": "Australia",
+    "year": 2025,
+    "active_cells": 142160,
+    "m_count": 252292,
+    "v_count": 1232396,
+    "m_frp_sum": 15407311.2,
+    "v_frp_sum": 13908400.98,
+    "viirs_to_modis_ratio": 0.9027
+  },
+  {
+    "region": "Mediterranean",
+    "year": 2018,
+    "active_cells": 65175,
+    "m_count": 33567,
+    "v_count": 189946,
+    "m_frp_sum": 872805.1,
+    "v_frp_sum": 992588.75,
+    "viirs_to_modis_ratio": 1.1372
+  },
+  {
+    "region": "Mediterranean",
+    "year": 2019,
+    "active_cells": 98345,
+    "m_count": 50651,
+    "v_count": 275686,
+    "m_frp_sum": 1426563.0,
+    "v_frp_sum": 1639236.12,
+    "viirs_to_modis_ratio": 1.1491
+  },
+  {
+    "region": "Mediterranean",
+    "year": 2020,
+    "active_cells": 82102,
+    "m_count": 43664,
+    "v_count": 242697,
+    "m_frp_sum": 1566237.6,
+    "v_frp_sum": 1576029.2,
+    "viirs_to_modis_ratio": 1.0063
+  },
+  {
+    "region": "Mediterranean",
+    "year": 2021,
+    "active_cells": 73652,
+    "m_count": 43575,
+    "v_count": 245114,
+    "m_frp_sum": 2400799.4,
+    "v_frp_sum": 1951323.41,
+    "viirs_to_modis_ratio": 0.8128
+  },
+  {
+    "region": "Mediterranean",
+    "year": 2022,
+    "active_cells": 72212,
+    "m_count": 37166,
+    "v_count": 230865,
+    "m_frp_sum": 1856783.5,
+    "v_frp_sum": 1608935.16,
+    "viirs_to_modis_ratio": 0.8665
+  },
+  {
+    "region": "Mediterranean",
+    "year": 2023,
+    "active_cells": 73803,
+    "m_count": 35656,
+    "v_count": 219569,
+    "m_frp_sum": 1517171.0,
+    "v_frp_sum": 1475192.36,
+    "viirs_to_modis_ratio": 0.9723
+  },
+  {
+    "region": "Mediterranean",
+    "year": 2024,
+    "active_cells": 76602,
+    "m_count": 37066,
+    "v_count": 232540,
+    "m_frp_sum": 1447154.0,
+    "v_frp_sum": 1386316.07,
+    "viirs_to_modis_ratio": 0.958
+  },
+  {
+    "region": "Mediterranean",
+    "year": 2025,
+    "active_cells": 72309,
+    "m_count": 44870,
+    "v_count": 245004,
+    "m_frp_sum": 3179100.9,
+    "v_frp_sum": 2273729.85,
+    "viirs_to_modis_ratio": 0.7152
+  }
+]

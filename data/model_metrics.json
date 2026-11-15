@@ -1,0 +1,297 @@
+{
+  "model": "XGBoost Tweedie (tweedie_variance_power=1.5)",
+  "cv_summary": [
+    {
+      "stat": "mean",
+      "log_mae": 0.882894,
+      "log_corr": 0.658119
+    },
+    {
+      "stat": "std",
+      "log_mae": 0.000429,
+      "log_corr": 0.000447
+    }
+  ],
+  "cv_fold_scores": [
+    {
+      "fold": 1.0,
+      "best_iter": 599.0,
+      "log_mae": 0.882916,
+      "log_corr": 0.657787
+    },
+    {
+      "fold": 2.0,
+      "best_iter": 599.0,
+      "log_mae": 0.882683,
+      "log_corr": 0.658007
+    },
+    {
+      "fold": 3.0,
+      "best_iter": 599.0,
+      "log_mae": 0.883269,
+      "log_corr": 0.658004
+    },
+    {
+      "fold": 4.0,
+      "best_iter": 599.0,
+      "log_mae": 0.882998,
+      "log_corr": 0.657987
+    },
+    {
+      "fold": 5.0,
+      "best_iter": 599.0,
+      "log_mae": 0.882812,
+      "log_corr": 0.658659
+    },
+    {
+      "fold": 6.0,
+      "best_iter": 599.0,
+      "log_mae": 0.883504,
+      "log_corr": 0.657411
+    },
+    {
+      "fold": 7.0,
+      "best_iter": 599.0,
+      "log_mae": 0.882895,
+      "log_corr": 0.658383
+    },
+    {
+      "fold": 8.0,
+      "best_iter": 599.0,
+      "log_mae": 0.882635,
+      "log_corr": 0.65854
+    },
+    {
+      "fold": 9.0,
+      "best_iter": 599.0,
+      "log_mae": 0.88327,
+      "log_corr": 0.657662
+    },
+    {
+      "fold": 10.0,
+      "best_iter": 599.0,
+      "log_mae": 0.881961,
+      "log_corr": 0.658746
+    }
+  ],
+  "oof_evaluation": [
+    {
+      "subset": "ALL",
+      "rows": 10000000.0,
+      "raw_log_MAE": 1.823858,
+      "harm_log_MAE": 0.882823,
+      "harm_log_RMSE": 1.10482,
+      "raw_log_Corr": 0.559144,
+      "harm_log_Corr": 0.658335,
+      "harm_R2_log": 0.277302,
+      "total_frp_ratio(pred/true)": 0.984832
+    },
+    {
+      "subset": "Both Detected (M>0 & V>0)",
+      "rows": 2903995.0,
+      "raw_log_MAE": 0.944164,
+      "harm_log_MAE": 0.868936,
+      "harm_log_RMSE": 1.125699,
+      "raw_log_Corr": 0.583167,
+      "harm_log_Corr": 0.671979,
+      "harm_R2_log": 0.335445,
+      "total_frp_ratio(pred/true)": 0.979336
+    },
+    {
+      "subset": "VIIRS Only (M=0 & V>0)",
+      "rows": 7059887.0,
+      "raw_log_MAE": 2.179848,
+      "harm_log_MAE": 0.876423,
+      "harm_log_RMSE": 1.072893,
+      "raw_log_Corr": null,
+      "harm_log_Corr": 0.391277,
+      "harm_R2_log": -0.119402,
+      "total_frp_ratio(pred/true)": 0.988346
+    },
+    {
+      "subset": "MODIS Only (M>0 & V=0)",
+      "rows": 36118.0,
+      "raw_log_MAE": 2.969637,
+      "harm_log_MAE": 3.25034,
+      "harm_log_RMSE": 3.326696,
+      "raw_log_Corr": null,
+      "harm_log_Corr": null,
+      "harm_R2_log": null,
+      "total_frp_ratio(pred/true)": 1223565973439.8127
+    }
+  ],
+  "temporal_holdout_evaluation": [
+    {
+      "subset": "2024-2025 Holdout ALL",
+      "rows": 2592597.0,
+      "raw_log_MAE": 1.86509,
+      "harm_log_MAE": 0.883662,
+      "harm_log_RMSE": 1.106301,
+      "raw_log_Corr": 0.533856,
+      "harm_log_Corr": 0.638596,
+      "harm_R2_log": 0.274664,
+      "total_frp_ratio(pred/true)": 0.921593
+    },
+    {
+      "subset": "2024-2025 Both Detected",
+      "rows": 725534.0,
+      "raw_log_MAE": 0.989181,
+      "harm_log_MAE": 0.895579,
+      "harm_log_RMSE": 1.154015,
+      "raw_log_Corr": 0.548545,
+      "harm_log_Corr": 0.646349,
+      "harm_R2_log": 0.320937,
+      "total_frp_ratio(pred/true)": 0.91933
+    }
+  ],
+  "quantile_coverage": {
+    "coverage_80pct": 0.789486116204209,
+    "q50_log_mae": 0.7690899968147278
+  },
+  "feature_importance_gain": [
+    {
+      "feature": "m_log_frp_sum",
+      "gain": 289243.440625
+    },
+    {
+      "feature": "m_log_frp_max",
+      "gain": 39823.65
+    },
+    {
+      "feature": "m_log_nb8_frp_sum",
+      "gain": 26301.913086
+    },
+    {
+      "feature": "m_count",
+      "gain": 24598.533984
+    },
+    {
+      "feature": "grid_m_log_frp_mean",
+      "gain": 6912.69834
+    },
+    {
+      "feature": "m_bright_max",
+      "gain": 5562.539355
+    },
+    {
+      "feature": "m_log_nb8_frp_max",
+      "gain": 4462.208887
+    },
+    {
+      "feature": "m_lat_std",
+      "gain": 2844.292505
+    },
+    {
+      "feature": "m_nb8_count",
+      "gain": 2001.663806
+    },
+    {
+      "feature": "m_aqua_ratio",
+      "gain": 1957.120044
+    },
+    {
+      "feature": "m_nb8_active_cells",
+      "gain": 1712.47782
+    },
+    {
+      "feature": "grid_m_active_weeks",
+      "gain": 1640.271765
+    },
+    {
+      "feature": "m_active_days",
+      "gain": 1351.701184
+    },
+    {
+      "feature": "lat_center",
+      "gain": 1182.412744
+    },
+    {
+      "feature": "sin_week",
+      "gain": 1174.407654
+    },
+    {
+      "feature": "m_lon_std",
+      "gain": 1102.383533
+    },
+    {
+      "feature": "grid_m_type0_mean",
+      "gain": 972.532812
+    },
+    {
+      "feature": "lon_center",
+      "gain": 940.532886
+    },
+    {
+      "feature": "cos_week",
+      "gain": 911.066473
+    },
+    {
+      "feature": "m_temp_diff",
+      "gain": 863.473846
+    },
+    {
+      "feature": "m_log_frp_mean",
+      "gain": 830.008923
+    },
+    {
+      "feature": "cos_lat",
+      "gain": 788.808435
+    },
+    {
+      "feature": "m_night_ratio",
+      "gain": 771.557751
+    },
+    {
+      "feature": "m_log_frp_lead1",
+      "gain": 767.081897
+    },
+    {
+      "feature": "m_conf_mean",
+      "gain": 617.75553
+    },
+    {
+      "feature": "m_log_frp_roll12w",
+      "gain": 614.219641
+    },
+    {
+      "feature": "m_type0_ratio",
+      "gain": 581.69137
+    },
+    {
+      "feature": "m_log_frp_roll4w",
+      "gain": 575.129816
+    },
+    {
+      "feature": "m_log_frp_lag1",
+      "gain": 530.292197
+    },
+    {
+      "feature": "m_local_hour_cos",
+      "gain": 507.784412
+    },
+    {
+      "feature": "m_t31_mean",
+      "gain": 425.594235
+    },
+    {
+      "feature": "m_local_hour_sin",
+      "gain": 388.961725
+    },
+    {
+      "feature": "m_frp_peak_ratio",
+      "gain": 343.450586
+    },
+    {
+      "feature": "m_center_to_nb_ratio",
+      "gain": 332.498837
+    },
+    {
+      "feature": "m_pixel_area_mean",
+      "gain": 306.080051
+    },
+    {
+      "feature": "m_pixel_area_max",
+      "gain": 228.140314
+    }
+  ]
+}

@@ -1,0 +1,2609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>PyroCopilot — 3D Earth Thermal &amp; Swidden Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet" />
+  <style>
+    /* Google Earth Web Material 3 Dark Tokens (derived from Google Earth_files) */
+    :root {
+      color-scheme: dark;
+      --ge-space: #000000;
+      --ge-bar: #131314;
+      --ge-surface: #1e1f20;
+      --ge-surface-high: #28292a;
+      --ge-surface-hover: #353739;
+      --ge-border: #444746;
+      --ge-border-subtle: rgba(227, 227, 227, 0.16);
+      --ge-text: #e8eaed;
+      --ge-text-muted: #c4c7c5;
+      --ge-accent: #a8c7fa;
+      --ge-accent-strong: #8ab4f8;
+      --ge-accent-container: #004a77;
+      --ge-on-accent: #062e6f;
+      --font-sans: "Google Sans Text", "Google Sans", "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "Google Sans Mono", "Roboto Mono", ui-monospace, monospace;
+      scrollbar-width: thin;
+      scrollbar-color: var(--ge-border) var(--ge-surface);
+    }
+
+    @supports not (scrollbar-color: auto) {
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-thumb { background: var(--ge-border); border-radius: 4px; }
+      ::-webkit-scrollbar-track { background: var(--ge-surface); }
+    }
+
+    * { box-sizing: border-box; }
+    canvas, svg, gmp-map-3d { display: block; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      inline-size: 100%;
+      block-size: 100dvb;
+      overflow: clip;
+      background: var(--ge-space);
+      color: var(--ge-text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .material-symbols-outlined {
+      font-family: "Material Symbols Outlined";
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      user-select: none;
+      flex: 0 0 auto;
+    }
+
+    /* Authentic Google Earth Splash / Loading Screen (from Google Earth_files) */
+    #earth-splashscreen {
+      position: fixed;
+      inset: 0;
+      background-color: #000000;
+      background-image:
+        radial-gradient(circle at 82% 88%, rgba(33, 95, 168, 0.48) 0%, rgba(12, 36, 72, 0.22) 38%, rgba(0, 0, 0, 0) 70%),
+        url("https://www.gstatic.com/earth/images/00-earth-splash-1x-ltr.jpg"),
+        url("https://www.gstatic.com/earth/images/01-earth-splash-stars-ltr.webp");
+      background-position: center, bottom right, top right;
+      background-size: cover, 1280px 463px, cover;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      z-index: 100;
+      opacity: 1;
+      transition: opacity 480ms cubic-bezier(0.4, 0, 0.2, 1), visibility 480ms ease;
+    }
+
+    #earth-splashscreen.loaded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-globe-emblem {
+      inline-size: 92px;
+      block-size: 92px;
+      border-radius: 22px;
+      filter: drop-shadow(0 0 28px rgba(59, 123, 255, 0.42)) drop-shadow(0 0 18px rgba(255, 122, 47, 0.32));
+      animation: splashFloat 2.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes splashFloat {
+      from { transform: translateY(-4px) scale(0.98); }
+      to { transform: translateY(4px) scale(1.02); }
+    }
+
+    /* Google 4-Color Material Spinner (mspin_googcolor_large style) */
+    .goog-spinner {
+      inline-size: 52px;
+      block-size: 52px;
+      animation: mspinRotate 1568ms linear infinite;
+    }
+
+    .goog-spinner circle {
+      fill: none;
+      stroke-width: 4.5;
+      stroke-linecap: round;
+      stroke-dasharray: 1, 150;
+      stroke-dashoffset: 0;
+      animation: mspinDash 1.5s ease-in-out infinite, mspinColor 6s ease-in-out infinite;
+    }
+
+    @keyframes mspinRotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes mspinDash {
+      0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
+      50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
+      100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
+    }
+
+    @keyframes mspinColor {
+      0%, 100% { stroke: #4285F4; }
+      25% { stroke: #EA4335; }
+      50% { stroke: #FBBC05; }
+      75% { stroke: #34A853; }
+    }
+
+    .splash-status {
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--ge-text);
+    }
+
+    .splash-sub {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--ge-text-muted);
+      margin-block-start: -14px;
+    }
+
+    /* Fullscreen 3D Space & Map Stage */
+    .stage {
+      position: fixed;
+      inset: 0;
+      block-size: 100%;
+      inline-size: 100%;
+      background: radial-gradient(circle at 50% 52%, #070d18 0%, #000000 74%);
+    }
+
+    #globeCanvas {
+      inline-size: 100%;
+      block-size: 100%;
+      cursor: grab;
+    }
+
+    #globeCanvas:active { cursor: grabbing; }
+
+    #gmpMapContainer {
+      position: absolute;
+      inset: 0;
+      inline-size: 100%;
+      block-size: 100%;
+      display: none;
+    }
+
+    #gmpMapContainer.active {
+      display: block;
+    }
+
+    gmp-map-3d {
+      inline-size: 100%;
+      block-size: 100%;
+    }
+
+    /* Larger Top Google Earth Style Bar with Icon + Text */
+    .top-bar {
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline: 0;
+      block-size: 68px;
+      padding-inline: 18px;
+      background: rgba(19, 19, 20, 0.94);
+      border-block-end: 1px solid var(--ge-border-subtle);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: safe center;
+      gap: 10px;
+      z-index: 30;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .brand-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      block-size: 46px;
+      padding: 0 14px 0 8px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--ge-text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .brand-btn:hover { background: var(--ge-surface-high); }
+
+    .search-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--ge-surface-high);
+      border: 1px solid var(--ge-border);
+      border-radius: 999px;
+      padding: 0 16px;
+      block-size: 46px;
+      inline-size: clamp(200px, 22vw, 310px);
+      min-inline-size: 0;
+      flex: 0 1 auto;
+      transition: border-color 140ms ease, background-color 140ms ease;
+    }
+
+    .search-pill:focus-within {
+      border-color: var(--ge-accent);
+      background: var(--ge-surface);
+    }
+
+    .search-pill .material-symbols-outlined {
+      font-size: 24px;
+      color: var(--ge-text-muted);
+    }
+
+    .search-input {
+      inline-size: 100%;
+      min-inline-size: 0;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--ge-text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+    }
+
+    .search-input::placeholder { color: var(--ge-text-muted); }
+
+    .toolbar-divider {
+      inline-size: 1px;
+      block-size: 28px;
+      background: var(--ge-border);
+      margin-inline: 4px;
+      flex: 0 0 auto;
+    }
+
+    .nav-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      block-size: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid var(--ge-border-subtle);
+      background: var(--ge-surface);
+      color: var(--ge-text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+    }
+
+    .nav-btn:hover {
+      background: var(--ge-surface-hover);
+      border-color: var(--ge-border);
+    }
+
+    .nav-btn[aria-pressed="true"] {
+      background: var(--ge-accent-container);
+      color: var(--ge-accent);
+      border-color: var(--ge-accent);
+    }
+
+    .spacer { flex: 1 1 auto; }
+
+    /* Larger Popovers for Layers / Regions */
+    .popover {
+      position: fixed;
+      inset-block-start: 74px;
+      background: var(--ge-surface);
+      border: 1px solid var(--ge-border);
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+      z-index: 45;
+      display: none;
+      min-inline-size: 230px;
+    }
+
+    .popover.open { display: grid; gap: 4px; }
+
+    .pop-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 0;
+      background: transparent;
+      color: var(--ge-text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 500;
+      text-align: start;
+      cursor: pointer;
+    }
+
+    .pop-item:hover { background: var(--ge-surface-hover); }
+    .pop-item[aria-current="true"] {
+      background: var(--ge-accent-container);
+      color: var(--ge-accent);
+    }
+
+    /* Left Collapsible AI Assistant Drawer (Larger & All English) */
+    .ai-drawer {
+      position: fixed;
+      inset-block-start: 80px;
+      inset-block-end: 196px;
+      inset-inline-start: 18px;
+      inline-size: min(360px, calc(100% - 36px));
+      background: rgba(30, 31, 32, 0.94);
+      border: 1px solid var(--ge-border);
+      border-radius: 20px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      z-index: 25;
+      transform: translateX(0);
+      opacity: 1;
+      transition: transform 200ms cubic-bezier(0.2, 0, 0, 1), opacity 180ms ease;
+    }
+
+    .ai-drawer.hidden {
+      transform: translateX(calc(-100% - 28px));
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ai-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-block-end: 1px solid var(--ge-border-subtle);
+    }
+
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--ge-accent);
+    }
+
+    .ai-messages {
+      flex: 1 1 auto;
+      min-block-size: 0;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scrollbar-gutter: stable;
+      overscroll-behavior: contain;
+    }
+
+    .msg {
+      max-inline-size: 90%;
+      padding: 11px 15px;
+      border-radius: 16px;
+      font-size: 15px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      background: var(--ge-accent-container);
+      color: var(--ge-text);
+      border-end-end-radius: 4px;
+    }
+
+    .msg.ai {
+      align-self: flex-start;
+      background: var(--ge-surface-high);
+      color: var(--ge-text);
+      border-end-start-radius: 4px;
+    }
+
+    .ai-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 16px 12px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--ge-border);
+      background: var(--ge-surface);
+      color: var(--ge-text);
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 120ms ease, border-color 120ms ease;
+    }
+
+    .chip:hover {
+      background: var(--ge-surface-hover);
+      border-color: var(--ge-accent);
+    }
+
+    .ai-form {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-block-start: 1px solid var(--ge-border-subtle);
+    }
+
+    .ai-input {
+      flex: 1 1 auto;
+      min-inline-size: 0;
+      block-size: 44px;
+      border-radius: 999px;
+      border: 1px solid var(--ge-border);
+      background: var(--ge-surface);
+      color: var(--ge-text);
+      padding: 0 16px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      outline: none;
+    }
+
+    .ai-input:focus { border-color: var(--ge-accent); }
+
+    .ai-send {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      block-size: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 0;
+      background: var(--ge-accent);
+      color: var(--ge-on-accent);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .ai-send:hover { background: var(--ge-accent-strong); }
+
+    /* Floating Reopen Button when AI Drawer is closed */
+    .ai-fab {
+      position: fixed;
+      inset-block-start: 80px;
+      inset-inline-start: 18px;
+      block-size: 48px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid var(--ge-border);
+      background: rgba(30, 31, 32, 0.94);
+      color: var(--ge-accent);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      z-index: 24;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55);
+    }
+
+    .ai-fab:hover { background: var(--ge-surface-hover); }
+
+    /* Bottom Timeline Dock + Blue-to-Red Thermal Scale */
+    .timeline-dock {
+      position: fixed;
+      inset-block-end: 40px;
+      inset-inline-start: 50%;
+      transform: translateX(-50%);
+      inline-size: min(740px, calc(100% - 36px));
+      background: rgba(30, 31, 32, 0.94);
+      border: 1px solid var(--ge-border);
+      border-radius: 20px;
+      backdrop-filter: blur(16px);
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+      z-index: 25;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .timeline-dock.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 20px);
+    }
+
+    .tl-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      block-size: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--ge-border-subtle);
+      background: var(--ge-surface-high);
+      color: var(--ge-text);
+      font-family: var(--font-sans);
+      font-size: 14.5px;
+      font-weight: 500;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .tl-btn:hover { background: var(--ge-surface-hover); }
+    .tl-btn.primary {
+      background: var(--ge-accent-container);
+      color: var(--ge-accent);
+      border-color: var(--ge-accent);
+    }
+
+    .tl-slider {
+      flex: 1 1 auto;
+      min-inline-size: 0;
+      block-size: 8px;
+      accent-color: var(--ge-accent-strong);
+      cursor: pointer;
+    }
+
+    .tl-date {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ge-accent);
+      min-inline-size: 105px;
+      text-align: right;
+    }
+
+    .tl-top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tl-year-pills {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tl-year-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--ge-border-subtle);
+      background: var(--ge-surface-high);
+      color: var(--ge-text-muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .tl-year-pill:hover {
+      background: var(--ge-surface-hover);
+      color: var(--ge-text);
+    }
+
+    .tl-year-pill[aria-pressed="true"] {
+      background: var(--ge-accent-container);
+      color: var(--ge-accent);
+      border-color: var(--ge-accent);
+      font-weight: 600;
+    }
+
+    .tl-date-search {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tl-date-input {
+      background: var(--ge-surface-high);
+      color: var(--ge-text);
+      border: 1px solid var(--ge-border);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color-scheme: dark;
+    }
+
+    .tl-slider-wrap {
+      flex: 1 1 auto;
+      min-inline-size: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .tl-year-ticks {
+      position: relative;
+      block-size: 16px;
+      inline-size: 100%;
+    }
+
+    .tl-year-tick {
+      position: absolute;
+      inset-block-start: 0;
+      transform: translateX(-50%);
+      border: 0;
+      background: transparent;
+      color: var(--ge-text-muted);
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      padding: 0 2px;
+      cursor: pointer;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .tl-year-tick::before {
+      content: "";
+      display: block;
+      inline-size: 1px;
+      block-size: 5px;
+      background: var(--ge-border);
+      margin-block-end: 2px;
+    }
+
+    .tl-year-tick:hover,
+    .tl-year-tick.active {
+      color: var(--ge-accent);
+    }
+
+    .tl-year-tick.active::before {
+      background: var(--ge-accent);
+      block-size: 7px;
+    }
+      text-align: end;
+      flex: 0 0 auto;
+    }
+
+    /* Blue-to-Red Heat Legend Bar */
+    .heat-scale-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--ge-text-muted);
+      padding-inline: 4px;
+    }
+
+    .heat-gradient-bar {
+      flex: 1 1 auto;
+      block-size: 8px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #1e64eb 0%, #00d2ff 25%, #bef264 50%, #ff7b00 75%, #ff1744 100%);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    /* Right-Edge Camera Controls (Stacked vertically above Timeline Dock so they never overlap) */
+    .earth-controls {
+      position: fixed;
+      inset-block-end: 196px;
+      inset-inline-end: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    .ctrl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      block-size: 44px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--ge-border);
+      background: rgba(30, 31, 32, 0.92);
+      color: var(--ge-text);
+      font-family: var(--font-sans);
+      font-size: 14.5px;
+      font-weight: 500;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+
+    .ctrl-btn:hover { background: var(--ge-surface-hover); }
+
+    /* Bottom Telemetry Strip */
+    .status-strip {
+      position: fixed;
+      inset-block-end: 0;
+      inset-inline: 0;
+      block-size: 32px;
+      padding-inline: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--ge-text-muted);
+      background: rgba(19, 19, 20, 0.88);
+      border-block-start: 1px solid var(--ge-border-subtle);
+      z-index: 15;
+    }
+
+    .scale-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scale-line {
+      inline-size: 64px;
+      block-size: 5px;
+      border-inline: 1.5px solid var(--ge-text-muted);
+      border-block-end: 1.5px solid var(--ge-text-muted);
+    }
+
+    /* Google Maps 3D API Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(6px);
+      display: none;
+      place-items: center;
+      z-index: 80;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open { display: grid; }
+
+    .modal-card {
+      inline-size: min(520px, 100%);
+      background: var(--ge-surface);
+      border: 1px solid var(--ge-border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-desc {
+      margin: 0;
+      font-size: 14.5px;
+      color: var(--ge-text-muted);
+      line-height: 1.5;
+    }
+
+    .modal-input {
+      inline-size: 100%;
+      block-size: 46px;
+      border-radius: 12px;
+      border: 1px solid var(--ge-border);
+      background: var(--ge-surface-high);
+      color: var(--ge-text);
+      padding: 0 14px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-block-start: 4px;
+    }
+
+    @media (max-width: 980px) {
+      .earth-controls { inset-block-end: 210px; }
+    }
+
+    /* Right Slide-Over Analytics Workspace Drawer (Design 4 Material 3 Dark) */
+    .analytics-drawer {
+      position: fixed;
+      inset-block-start: 82px;
+      inset-block-end: 46px;
+      inset-inline-end: 16px;
+      inline-size: min(620px, calc(100vw - 32px));
+      background: rgba(30, 31, 32, 0.96);
+      border: 1px solid var(--ge-border);
+      border-radius: 20px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 54px rgba(0, 0, 0, 0.72);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 35;
+      transform: translateX(calc(100% + 28px));
+      transition: transform 240ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .analytics-drawer.open {
+      transform: translateX(0);
+    }
+
+    .analytics-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-block-end: 1px solid var(--ge-border-subtle);
+      flex: 0 0 auto;
+    }
+
+    .analytics-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .analytics-tablist {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      gap: 4px;
+      padding: 0 14px;
+      border-block-end: 1px solid var(--ge-border-subtle);
+      background: rgba(19, 19, 20, 0.65);
+      flex: 0 0 auto;
+    }
+
+    .analytics-tablist::-webkit-scrollbar { display: none; }
+
+    .analytics-tab {
+      position: relative;
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      block-size: 46px;
+      padding: 0 12px;
+      border: 0;
+      background: transparent;
+      color: var(--ge-text-muted);
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .analytics-tab:hover { color: var(--ge-text); }
+
+    .analytics-tab[aria-selected="true"] {
+      color: var(--ge-accent);
+    }
+
+    .analytics-tab[aria-selected="true"]::after {
+      content: "";
+      position: absolute;
+      inset: auto 8px 0;
+      border-block-end: 3px solid var(--ge-accent);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .analytics-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      min-block-size: 0;
+    }
+
+    .analytics-panel-inner {
+      padding: 16px 18px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .radio-pills {
+      display: inline-flex;
+      background: var(--ge-surface-high);
+      border: 1px solid var(--ge-border);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .radio-pills label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--ge-text-muted);
+    }
+
+    .radio-pills input { accent-color: var(--ge-accent); margin: 0; }
+    .radio-pills label:has(input:checked) {
+      background: var(--ge-accent-container);
+      color: var(--ge-accent);
+      font-weight: 500;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+      gap: 10px;
+    }
+
+    .kpi-card {
+      background: var(--ge-surface-high);
+      border: 1px solid var(--ge-border-subtle);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .kpi-label { font-size: 11.5px; color: var(--ge-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .kpi-value { font-family: var(--font-mono); font-size: 19px; font-weight: 600; margin-block: 4px 2px; color: var(--ge-text); }
+    .kpi-sub { font-size: 11.5px; color: var(--ge-text-muted); }
+
+    .subcard {
+      background: rgba(19, 19, 20, 0.55);
+      border: 1px solid var(--ge-border-subtle);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .subcard-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ge-text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .live-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(0, 74, 119, 0.35);
+      border: 1px solid rgba(168, 199, 250, 0.35);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .live-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--ge-text-muted);
+    }
+
+    /* Responsive Data Table (Sticky headers + container stacked fallback) */
+    .table-wrapper {
+      overflow: auto;
+      max-inline-size: 100%;
+      max-block-size: 280px;
+      container-type: inline-size;
+      border: 1px solid var(--ge-border-subtle);
+      border-radius: 10px;
+    }
+
+    .ge-table {
+      inline-size: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 12.5px;
+    }
+
+    .ge-table thead {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 2;
+      background: var(--ge-surface-high);
+    }
+
+    .ge-table th, .ge-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-block-end: 1px solid var(--ge-border-subtle);
+      white-space: nowrap;
+    }
+
+    .ge-table tbody th {
+      position: sticky;
+      inset-inline-start: 0;
+      background: var(--ge-surface);
+      font-weight: 500;
+      z-index: 1;
+    }
+
+    .clickable-row { cursor: pointer; }
+    .clickable-row:hover td, .clickable-row:hover th { background: var(--ge-surface-hover); }
+
+    .prob-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .hbar-list { display: flex; flex-direction: column; gap: 7px; }
+    .hbar-row { display: grid; grid-template-columns: 150px 1fr 56px; align-items: center; gap: 8px; font-size: 12px; }
+    .hbar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ge-text-muted); }
+    .hbar-track { block-size: 8px; background: var(--ge-surface-high); border-radius: 999px; overflow: hidden; }
+    .hbar-fill { block-size: 100%; border-radius: 999px; }
+    .hbar-val { font-family: var(--font-mono); text-align: right; color: var(--ge-text); }
+
+    .dual-bar-row { display: grid; grid-template-columns: 64px 1fr 54px; align-items: center; gap: 8px; font-size: 12px; }
+    .dual-bars { display: flex; flex-direction: column; gap: 3px; }
+    .dual-bar-yr { font-family: var(--font-mono); color: var(--ge-text-muted); }
+    .dual-bar-val { font-family: var(--font-mono); text-align: right; }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .cal-dow {
+      text-align: center;
+      font-size: 11px;
+      color: var(--ge-text-muted);
+      padding-block-end: 4px;
+    }
+
+    .cal-day {
+      border: 1px solid var(--ge-border-subtle);
+      border-radius: 8px;
+      padding: 5px 3px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: #ffffff;
+      background: var(--ge-surface-high);
+      cursor: pointer;
+      font-family: var(--font-sans);
+    }
+
+    .cal-day.blank { visibility: hidden; pointer-events: none; }
+    .cal-day:disabled { opacity: 0.4; cursor: default; }
+    .cal-day[aria-pressed="true"] { outline: 2px solid #ffffff; outline-offset: 1px; }
+    .cd-num { font-size: 11px; font-weight: 600; }
+    .cd-val { font-family: var(--font-mono); font-size: 10px; opacity: 0.92; }
+
+    .chart-svg { inline-size: 100%; block-size: auto; display: block; }
+    .ge-select {
+      background: var(--ge-surface-high);
+      color: var(--ge-text);
+      border: 1px solid var(--ge-border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+    }
+
+    .empty-td, .empty-note { color: var(--ge-text-muted); font-size: 13px; padding: 12px; text-align: center; }
+
+    @media (forced-colors: active) {
+      .nav-btn[aria-pressed="true"],
+      .pop-item[aria-current="true"],
+      .tl-btn.primary {
+        border: 2px solid Highlight;
+        background: Highlight;
+        color: HighlightText;
+      }
+      .analytics-tab[aria-selected="true"]::after {
+        border-block-end-color: Highlight;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- PyroCopilot Splash / Loading Screen -->
+  <div id="earth-splashscreen" role="status" aria-live="polite">
+    <svg class="splash-globe-emblem" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="splashCobalt" x1="7" y1="12" x2="89" y2="94" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#3B7BFF" />
+          <stop offset="100%" stop-color="#225BFF" />
+        </linearGradient>
+        <linearGradient id="splashFlame" x1="56" y1="92" x2="86" y2="52" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#FF4D2E" />
+          <stop offset="55%" stop-color="#FF7A2F" />
+          <stop offset="100%" stop-color="#FFB347" />
+        </linearGradient>
+      </defs>
+      <rect x="20" y="2" width="10" height="7" rx="3.5" fill="#225BFF" />
+      <rect x="66" y="2" width="10" height="7" rx="3.5" fill="#225BFF" />
+      <path d="M12.5 12H32C38.08 12 43 16.92 43 23V25A4 4 0 0 0 47 29H49A4 4 0 0 0 53 25V23C53 16.92 57.92 12 64 12H83.5A5.5 5.5 0 0 1 89 17.5V37C89 43.08 84.08 48 78 48H64C57.92 48 53 43.08 53 37V35A4 4 0 0 0 49 31H47A4 4 0 0 0 43 35V37C43 43.08 38.08 48 32 48A4 4 0 0 0 28 52V54A4 4 0 0 0 32 58C38.08 58 43 62.92 43 69V83C43 89.08 38.08 94 32 94H12.5A5.5 5.5 0 0 1 7 88.5V69C7 62.92 11.92 58 18 58A4 4 0 0 0 22 54V52A4 4 0 0 0 18 48C11.92 48 7 43.08 7 37V17.5A5.5 5.5 0 0 1 12.5 12Z" fill="url(#splashCobalt)" />
+      <path d="M71.5 52C71.5 52 88 63 88 77.2C88 86.48 80.48 94 71.2 94C61.92 94 54.4 86.48 54.4 77.2C54.4 70.2 58.3 64.4 62.8 60.6C62.6 64.8 65.1 68 68.4 68C67.1 62 68.6 56.4 71.5 52Z" fill="url(#splashFlame)" />
+      <path d="M71.4 72.5C71.4 72.5 77.6 77 77.6 82.2C77.6 85.73 74.73 88.6 71.2 88.6C67.67 88.6 64.8 85.73 64.8 82.2C64.8 78.5 67.9 75.2 71.4 72.5Z" fill="#FFF3D6" />
+    </svg>
+    <div style="font-size:26px;font-weight:700;letter-spacing:-0.02em;color:#ffffff;">PyroCopilot</div>
+    <svg class="goog-spinner" viewBox="0 0 50 50" aria-hidden="true">
+      <circle cx="25" cy="25" r="20"></circle>
+    </svg>
+    <div id="splashStatusText" class="splash-status">Loading PyroCopilot 3D Earth &amp; Telemetry...</div>
+    <div class="splash-sub">Global Swidden · NASA POWER Weather · 7-Day Fire Risk</div>
+  </div>
+
+  <!-- 3D Globe Canvas + Google Maps 3D Web Component Container -->
+  <div class="stage">
+    <canvas id="globeCanvas" aria-label="Interactive 3D Earth Globe"></canvas>
+    <div id="gmpMapContainer" aria-label="Google Maps 3D Container"></div>
+  </div>
+
+  <!-- Top Bar with Larger Icons + English Text Labels (No Product Name) -->
+  <header class="top-bar">
+    <button id="homeBtn" class="brand-btn" type="button" title="Reset Global View">
+      <svg width="30" height="30" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="astryxCobalt" x1="7" y1="12" x2="89" y2="94" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#3B7BFF" />
+            <stop offset="100%" stop-color="#225BFF" />
+          </linearGradient>
+          <linearGradient id="viirsFlame" x1="56" y1="92" x2="86" y2="52" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#FF4D2E" />
+            <stop offset="55%" stop-color="#FF7A2F" />
+            <stop offset="100%" stop-color="#FFB347" />
+          </linearGradient>
+        </defs>
+        <rect x="20" y="2" width="10" height="7" rx="3.5" fill="#225BFF" />
+        <rect x="66" y="2" width="10" height="7" rx="3.5" fill="#225BFF" />
+        <path d="M12.5 12H32C38.08 12 43 16.92 43 23V25A4 4 0 0 0 47 29H49A4 4 0 0 0 53 25V23C53 16.92 57.92 12 64 12H83.5A5.5 5.5 0 0 1 89 17.5V37C89 43.08 84.08 48 78 48H64C57.92 48 53 43.08 53 37V35A4 4 0 0 0 49 31H47A4 4 0 0 0 43 35V37C43 43.08 38.08 48 32 48A4 4 0 0 0 28 52V54A4 4 0 0 0 32 58C38.08 58 43 62.92 43 69V83C43 89.08 38.08 94 32 94H12.5A5.5 5.5 0 0 1 7 88.5V69C7 62.92 11.92 58 18 58A4 4 0 0 0 22 54V52A4 4 0 0 0 18 48C11.92 48 7 43.08 7 37V17.5A5.5 5.5 0 0 1 12.5 12Z" fill="url(#astryxCobalt)" />
+        <path d="M71.5 52C71.5 52 88 63 88 77.2C88 86.48 80.48 94 71.2 94C61.92 94 54.4 86.48 54.4 77.2C54.4 70.2 58.3 64.4 62.8 60.6C62.6 64.8 65.1 68 68.4 68C67.1 62 68.6 56.4 71.5 52Z" fill="url(#viirsFlame)" />
+        <path d="M71.4 72.5C71.4 72.5 77.6 77 77.6 82.2C77.6 85.73 74.73 88.6 71.2 88.6C67.67 88.6 64.8 85.73 64.8 82.2C64.8 78.5 67.9 75.2 71.4 72.5Z" fill="#FFF3D6" />
+      </svg>
+      <span>PyroCopilot</span>
+    </button>
+
+    <label class="search-pill">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input id="searchInput" class="search-input" type="search" list="regionList" placeholder="Search country, city, region, or Global..." aria-label="Search country, city, region, or Global" />
+      <datalist id="regionList"></datalist>
+    </label>
+
+    <div class="toolbar-divider" aria-hidden="true"></div>
+
+    <div class="nav-group" role="toolbar" aria-label="Earth Controls">
+      <button id="aiToggleBtn" class="nav-btn" type="button" aria-pressed="true">
+        <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+        <span>AI Chat</span>
+      </button>
+      <button id="layerBtn" class="nav-btn" type="button" aria-pressed="false">
+        <span class="material-symbols-outlined" aria-hidden="true">layers</span>
+        <span id="layerBtnLabel">Layers: VIIRS</span>
+      </button>
+      <button id="timelineToggleBtn" class="nav-btn" type="button" aria-pressed="true">
+        <span class="material-symbols-outlined" aria-hidden="true">history</span>
+        <span>Timeline</span>
+      </button>
+      <button id="analyticsBtn" class="nav-btn" type="button" aria-pressed="false">
+        <span class="material-symbols-outlined" aria-hidden="true">monitoring</span>
+        <span>Analytics</span>
+      </button>
+      <button id="byokBtn" class="nav-btn" type="button" aria-haspopup="dialog" title="Gemini API Key (BYOK)">
+        <span class="material-symbols-outlined" aria-hidden="true">vpn_key</span>
+        <span>BYOK Key</span>
+      </button>
+    </div>
+
+    <div class="spacer"></div>
+  </header>
+
+  <!-- Layer Popover -->
+  <div id="layerPopover" class="popover" role="menu" aria-label="Thermal Layers">
+    <button class="pop-item" data-layer="viirs" data-label="VIIRS" aria-current="true" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">local_fire_department</span>
+      <span>● VIIRS 375m Heat</span>
+    </button>
+    <button class="pop-item" data-layer="modis" data-label="MODIS" aria-current="false" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">satellite_alt</span>
+      <span>▲ MODIS 1km Heat</span>
+    </button>
+    <button class="pop-item" data-layer="gap" data-label="Bias Ratio" aria-current="false" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">compare_arrows</span>
+      <span>◆ Sensor Bias Ratio</span>
+    </button>
+    <button class="pop-item" data-layer="risk" data-label="7-Day Risk" aria-current="false" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+      <span>● 7-Day Fire Risk (Live)</span>
+    </button>
+    <button class="pop-item" data-layer="detect" data-label="Live Events" aria-current="false" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">radar</span>
+      <span>● Live Fire Events (NRT)</span>
+    </button>
+    <button class="pop-item" data-layer="swidden" data-label="Swidden" aria-current="false" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">agriculture</span>
+      <span>● Swidden / Persistent (Parquet)</span>
+    </button>
+  </div>
+
+  <!-- Region Popover -->
+  <div id="regionPopover" class="popover" role="menu" aria-label="Target Regions"></div>
+
+  <!-- Left Floating Button to Reopen AI Drawer -->
+  <button id="aiFab" class="ai-fab" type="button">
+    <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+    <span>Open AI Chat</span>
+  </button>
+
+  <!-- Left Collapsible AI Assistant Drawer -->
+  <aside id="aiDrawer" class="ai-drawer" aria-label="AI Assistant">
+    <div class="ai-head">
+      <span class="ai-badge">
+        <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+        <span>PyroCopilot</span>
+      </span>
+      <span style="display:inline-flex;align-items:center;gap:6px;">
+        <a href="./byok.html" class="nav-btn" style="block-size:34px;padding:0 10px;font-size:12px;text-decoration:none;" title="Open BYOK Key Manager & Parquet Console">
+          <span class="material-symbols-outlined" style="font-size:17px;" aria-hidden="true">vpn_key</span>
+          <span>BYOK</span>
+        </a>
+        <button id="aiCloseBtn" class="nav-btn" type="button" style="block-size:34px;padding:0 10px;font-size:13px;">
+          <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">close</span>
+          <span>Hide</span>
+        </button>
+      </span>
+    </div>
+
+    <div id="aiMessages" class="ai-messages">
+      <div class="msg ai">国名・都市名・地域名と「7day予測」「過去のスライダー」「焼畑」「天気」などを入力すると、対象国のデータだけを抽出し、3D地球の拡大・範囲ハイライト・7日リスク/過去タイムライン切替・Analyticsの絞り込みまで自動連動します。</div>
+    </div>
+
+    <div class="ai-chips">
+      <button class="chip" data-prompt="日本の7day予測と天気を見せて" type="button">
+        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">warning</span>
+        <span>日本 7-Day予測</span>
+      </button>
+      <button class="chip" data-prompt="2020年のオーストラリアの火災をスライダーで表示して" type="button">
+        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">history</span>
+        <span>2020 豪州スライダー</span>
+      </button>
+      <button class="chip" data-prompt="アマゾンの焼畑と天気を調べて範囲を拡大して解説して" type="button">
+        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">travel_explore</span>
+        <span>Amazon 焼畑・気象</span>
+      </button>
+      <button class="chip" data-prompt="サブサハラの焼畑分布と乾季の気象・湿度を解説して" type="button">
+        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">travel_explore</span>
+        <span>Sub-Saharan 焼畑</span>
+      </button>
+    </div>
+
+    <form id="aiForm" class="ai-form">
+      <input id="aiInput" class="ai-input" type="text" placeholder="Ask AI to focus region or compare..." autocomplete="off" />
+      <button class="ai-send" type="submit">
+        <span class="material-symbols-outlined" style="font-size:20px;" aria-hidden="true">send</span>
+        <span>Send</span>
+      </button>
+    </form>
+  </aside>
+
+  <!-- Right Slide-Over Analytics Workspace Drawer -->
+  <aside id="analyticsDrawer" class="analytics-drawer" aria-label="Fire Monitoring Analytics Workspace">
+    <div class="analytics-head">
+      <h2 class="analytics-title">
+        <span class="material-symbols-outlined" style="color:var(--ge-accent);" aria-hidden="true">monitoring</span>
+        <span>Fire Monitoring &amp; Forecast Workspace</span>
+      </h2>
+      <button id="analyticsCloseBtn" class="nav-btn" type="button" style="block-size:36px;padding:0 12px;font-size:14px;">
+        <span class="material-symbols-outlined" style="font-size:20px;" aria-hidden="true">close</span>
+        <span>Close</span>
+      </button>
+    </div>
+
+    <div id="analyticsTablist" class="analytics-tablist" role="tablist" aria-label="Analytics Modules">
+      <button id="tab-risk" class="analytics-tab" type="button" role="tab" aria-selected="true">
+        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">warning</span>
+        <span>7-Day Risk</span>
+      </button>
+      <button id="tab-detect" class="analytics-tab" type="button" role="tab" aria-selected="false" tabindex="-1">
+        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">radar</span>
+        <span>Live Detections</span>
+      </button>
+      <button id="tab-trend" class="analytics-tab" type="button" role="tab" aria-selected="false" tabindex="-1">
+        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">show_chart</span>
+        <span>Weekly Trends</span>
+      </button>
+      <button id="tab-regions" class="analytics-tab" type="button" role="tab" aria-selected="false" tabindex="-1">
+        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">grid_view</span>
+        <span>Regional Matrix</span>
+      </button>
+    </div>
+
+    <div class="analytics-body">
+      <!-- Tab 1: 7-Day Fire Risk -->
+      <section role="tabpanel" aria-labelledby="tab-risk" tabindex="0">
+        <div class="analytics-panel-inner">
+          <div class="panel-controls">
+            <div class="radio-pills" role="radiogroup" aria-label="Risk Model Selection">
+              <label><input type="radio" name="riskModelRadio" value="p" checked /> Combined (Weather + Fires)</label>
+              <label><input type="radio" name="riskModelRadio" value="pw" /> Weather Only</label>
+            </div>
+          </div>
+          <div id="riskLiveStatus"></div>
+          <div id="riskKpis" class="kpi-grid"></div>
+          <div class="subcard">
+            <h3 class="subcard-title" id="riskTableCaption">Top High-Risk Cities (Click row to fly 3D Earth)</h3>
+            <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="riskTableCaption">
+              <table class="ge-table">
+                <thead>
+                  <tr><th scope="col">City</th><th scope="col">Country</th><th scope="col">7d Prob</th><th scope="col">Key Drivers</th></tr>
+                </thead>
+                <tbody id="riskCitiesBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 2: Live Detections & Wildfire Calendar -->
+      <section role="tabpanel" aria-labelledby="tab-detect" hidden="until-found">
+        <div class="analytics-panel-inner">
+          <div id="detectLiveStatus"></div>
+          <div id="detectKpis" class="kpi-grid"></div>
+          <div class="subcard">
+            <div class="subcard-title">
+              <span>Wildfire Event Calendar (UTC)</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;">
+                <button id="calPrevBtn" class="tl-btn" type="button" aria-label="Previous Month">‹</button>
+                <span id="calMonthTitle" style="font-family:var(--font-mono);font-size:13px;">--</span>
+                <button id="calNextBtn" class="tl-btn" type="button" aria-label="Next Month">›</button>
+              </span>
+            </div>
+            <div id="detectCalendar" class="calendar-grid"></div>
+          </div>
+          <div class="subcard">
+            <h3 class="subcard-title" id="detectEventsCaption">Top Fire Events by FRP (Click row to fly 3D Earth)</h3>
+            <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="detectEventsCaption">
+              <table class="ge-table">
+                <thead>
+                  <tr><th scope="col">Country</th><th scope="col">Coords</th><th scope="col">FRP Sum</th><th scope="col">Pixels / Time</th></tr>
+                </thead>
+                <tbody id="detectEventsBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="subcard">
+            <h3 class="subcard-title">Events by Country</h3>
+            <div id="detectCountryBars" class="hbar-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 3: Weekly Trends -->
+      <section role="tabpanel" aria-labelledby="tab-trend" hidden="until-found">
+        <div class="analytics-panel-inner">
+          <div class="panel-controls">
+            <span style="font-size:13px;color:var(--ge-text-muted);">Filter Period</span>
+            <select id="trendYearSelect" class="ge-select" aria-label="Filter trend year">
+              <option value="all">All Years (2018–2025)</option>
+            </select>
+          </div>
+          <div id="trendKpis" class="kpi-grid"></div>
+          <div class="subcard">
+            <h3 class="subcard-title">
+              <span>Global Weekly FRP (MW)</span>
+              <span style="font-size:12px;color:var(--ge-text-muted);">Blue: MODIS · Red: VIIRS</span>
+            </h3>
+            <div id="trendFrpSvg"></div>
+          </div>
+          <div class="subcard">
+            <h3 class="subcard-title">Global Weekly Detection Counts</h3>
+            <div id="trendCountSvg"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 4: Regional Matrix -->
+      <section role="tabpanel" aria-labelledby="tab-regions" hidden="until-found">
+        <div class="analytics-panel-inner">
+          <div class="panel-controls">
+            <span style="font-size:13px;color:var(--ge-text-muted);">Target Region</span>
+            <select id="regionCompareSelect" class="ge-select" aria-label="Select region for annual comparison"></select>
+          </div>
+          <div class="subcard">
+            <h3 class="subcard-title">
+              <span>Annual Total FRP (MODIS vs VIIRS)</span>
+              <span style="font-size:12px;color:var(--ge-text-muted);">Blue: MODIS · Red: VIIRS</span>
+            </h3>
+            <div id="regionBars" class="hbar-list"></div>
+          </div>
+          <div class="subcard">
+            <h3 class="subcard-title" id="ratioMatrixCaption">VIIRS / MODIS Ratio Matrix (Region × Year)</h3>
+            <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="ratioMatrixCaption">
+              <table class="ge-table">
+                <thead id="ratioMatrixHead"></thead>
+                <tbody id="ratioMatrixBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <!-- Bottom Timeline Bar + Year Dividers + Date Search + Blue-to-Red Thermal Scale -->
+  <div id="timelineDock" class="timeline-dock" role="region" aria-label="Timeline and Thermal Scale">
+    <div class="tl-top-controls">
+      <div id="tlYearPills" class="tl-year-pills" role="group" aria-label="Filter Earth Grid by Year">
+        <button class="tl-year-pill" type="button" data-year="all" aria-pressed="true">All</button>
+      </div>
+      <form id="tlDateForm" class="tl-date-search">
+        <input id="tlDateSearch" class="tl-date-input" type="date" min="2018-03-26" max="2025-12-31" aria-label="Jump to date" />
+        <button class="tl-year-pill" type="submit">Go</button>
+      </form>
+    </div>
+    <div class="tl-row">
+      <button id="playBtn" class="tl-btn primary" type="button">
+        <span id="playIcon" class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+        <span id="playText">Play</span>
+      </button>
+      <button id="prevBtn" class="tl-btn" type="button">
+        <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+        <span>Prev</span>
+      </button>
+      <div class="tl-slider-wrap">
+        <input id="timeSlider" class="tl-slider" type="range" min="0" max="1" value="0" aria-label="Weekly Timeline" />
+        <div id="tlYearTicks" class="tl-year-ticks" aria-label="Year Dividers"></div>
+      </div>
+      <button id="nextBtn" class="tl-btn" type="button">
+        <span>Next</span>
+        <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+      </button>
+      <span id="timeLabel" class="tl-date">--</span>
+    </div>
+    <div class="heat-scale-row">
+      <span>● Low Heat (Blue)</span>
+      <div class="heat-gradient-bar" role="img" aria-label="Blue to Cyan to Yellow to Red thermal gradient"></div>
+      <span>◆ High Heat (Red)</span>
+    </div>
+  </div>
+
+  <!-- Bottom-Right Camera Controls with Icon + Label -->
+  <div class="earth-controls">
+    <button id="compassBtn" class="ctrl-btn" type="button">
+      <span class="material-symbols-outlined" style="color:#ea4335;" aria-hidden="true">explore</span>
+      <span>Reset 3D</span>
+    </button>
+    <button id="zoomOutBtn" class="ctrl-btn" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">remove</span>
+      <span>Zoom Out</span>
+    </button>
+    <button id="zoomInBtn" class="ctrl-btn" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">add</span>
+      <span>Zoom In</span>
+    </button>
+  </div>
+
+  <!-- Bottom Status Strip -->
+  <footer class="status-strip">
+    <span id="zoomPct">Zoom: 100% · Engine: 3D Globe</span>
+    <span style="display:inline-flex;align-items:center;gap:18px;">
+      <span class="scale-bar"><span id="scaleTxt">3,000 km</span><span class="scale-line"></span></span>
+      <span id="camTelemetry">Camera: 20,835 km · 20°00'N 135°00'E</span>
+    </span>
+  </footer>
+
+  <!-- Google Maps JavaScript API 3D (gmp-map-3d) Configuration Modal -->
+  <div id="gmpModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="gmpModalTitle">
+    <div class="modal-card">
+      <h2 id="gmpModalTitle" class="modal-title">
+        <span class="material-symbols-outlined" style="color:var(--ge-accent);" aria-hidden="true">public</span>
+        <span>Google Maps Platform 3D API (`&lt;gmp-map-3d&gt;`)</span>
+      </h2>
+      <p class="modal-desc">
+        Enter your <code>GOOGLE_MAPS_API_KEY</code> (or a Maps Demo Key with the Maps JavaScript API <code>maps3d</code> library enabled) to switch the viewport to live Google Photorealistic 3D Earth with Blue-to-Red thermal markers. Leave blank to use the built-in 3D terrain globe.
+      </p>
+      <input id="gmpKeyInput" class="modal-input" type="password" placeholder="Paste GOOGLE_MAPS_API_KEY..." autocomplete="off" />
+      <div class="modal-actions">
+        <button id="gmpUseBuiltinBtn" class="nav-btn" type="button">
+          <span class="material-symbols-outlined" aria-hidden="true">language</span>
+          <span>Use Built-in 3D Globe</span>
+        </button>
+        <button id="gmpActivateBtn" class="ai-send" type="button">
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          <span>Activate Google 3D</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Native Dialog: Gemini Bring Your Own Key (BYOK) Quick Settings -->
+  <style>
+    dialog#byokDialog {
+      max-width: 520px;
+      width: calc(100% - 32px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      background: rgba(14, 20, 32, 0.96);
+      color: #eef2f8;
+      padding: 20px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+    }
+    dialog#byokDialog::backdrop {
+      background: rgba(4, 7, 13, 0.72);
+      backdrop-filter: blur(6px);
+    }
+    .ai-telemetry-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .ai-t-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font: 500 11px/1.3 'JetBrains Mono', monospace;
+      background: rgba(255, 152, 0, 0.12);
+      border: 1px solid rgba(255, 152, 0, 0.35);
+      color: #ffd54f;
+    }
+    .ai-tour-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 9px;
+    }
+    .ai-step-btn {
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.06);
+      color: #eef2f8;
+      font: 500 11.5px/1.2 'Inter', sans-serif;
+      cursor: pointer;
+    }
+    .ai-step-btn:hover {
+      border-color: rgba(255, 152, 0, 0.65);
+      background: rgba(255, 152, 0, 0.16);
+    }
+  </style>
+  <dialog id="byokDialog" closedby="any" aria-labelledby="byokDialogTitle">
+    <h2 id="byokDialogTitle" class="modal-title" style="margin-top:0;">
+      <span class="material-symbols-outlined" style="color:var(--ge-accent);" aria-hidden="true">vpn_key</span>
+      <span>Gemini API Key (BYOK)</span>
+    </h2>
+    <p class="modal-desc" style="margin-bottom:12px;">
+      Parquet 焼畑・気象データの自然言語解析に使う Gemini API キーを設定・検証します。キーはブラウザの <code>localStorage</code> に保存されます。
+    </p>
+    <label for="byokDialogKeyInput" style="display:block;font-size:12px;color:#9aa6ba;margin-bottom:4px;">Gemini API Key</label>
+    <input id="byokDialogKeyInput" class="modal-input" type="password" placeholder="AQ.... or AIza..." autocomplete="off" spellcheck="false" style="margin-bottom:10px;" />
+    <label for="byokDialogModelSelect" style="display:block;font-size:12px;color:#9aa6ba;margin-bottom:4px;">Model</label>
+    <select id="byokDialogModelSelect" class="modal-input" style="margin-bottom:10px;">
+      <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
+      <option value="gemini-3.5-flash">gemini-3.5-flash</option>
+      <option value="gemini-3.6-flash">gemini-3.6-flash</option>
+    </select>
+    <div id="byokDialogStatus" style="font:500 12px/1.4 'JetBrains Mono', monospace;color:#9aa6ba;margin-bottom:12px;">Checking server BYOK config...</div>
+    <div class="modal-actions" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <a href="./byok.html" class="nav-btn" style="text-decoration:none;">
+        <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+        <span>Full BYOK Page</span>
+      </a>
+      <span style="display:inline-flex;gap:8px;">
+        <button id="byokDialogCloseBtn" class="nav-btn" type="button">Close</button>
+        <button id="byokDialogVerifyBtn" class="ai-send" type="button">
+          <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+          <span>Save &amp; Verify</span>
+        </button>
+      </span>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+  <script src="./shared_data.js"></script>
+  <script src="./globe_engine.js?v=20261115f"></script>
+  <script src="./fire_analytics.js?v=20261115f"></script>
+  <script src="./static_copilot.js?v=20261115g"></script>
+  <script>
+    (function () {
+      const data = window.FIRMS_DATA;
+      const weekly = (data.weekly || []).map((w) => ({
+        ...w,
+        d: w.d || String(w.week_start || '').slice(0, 10),
+        v: w.v != null ? w.v : (w.v_frp_sum || 0),
+        m: w.m != null ? w.m : (w.m_frp_sum || 0),
+      }));
+      const regions = Object.keys(window.FIRMSGlobe.REGION_CENTERS);
+      const canvas = document.getElementById('globeCanvas');
+      const splash = document.getElementById('earth-splashscreen');
+      const splashStatusText = document.getElementById('splashStatusText');
+
+      const zoomPctEl = document.getElementById('zoomPct');
+      const scaleTxtEl = document.getElementById('scaleTxt');
+      const camEl = document.getElementById('camTelemetry');
+
+      let activeEngine = 'builtin';
+      let gmpMap3dEl = null;
+
+      function fmtDms(val, posChar, negChar) {
+        const hemi = val >= 0 ? posChar : negChar;
+        const abs = Math.abs(val);
+        const deg = Math.floor(abs);
+        const min = Math.floor((abs - deg) * 60);
+        return `${deg}°${String(min).padStart(2, '0')}'${hemi}`;
+      }
+
+      const globe = window.FIRMSGlobe.createGlobe(canvas, {
+        data: data.grid,
+        layer: 'viirs',
+        colorMode: 'red-blue',
+        onViewChange(view) {
+          if (activeEngine !== 'builtin') return;
+          const pct = Math.round(view.zoom * 100);
+          const altKm = Math.round(20835 / view.zoom);
+          const scaleKm = Math.round(3000 / view.zoom / 100) * 100;
+          zoomPctEl.textContent = `Zoom: ${pct}% · Engine: 3D Terrain Globe`;
+          scaleTxtEl.textContent = `${scaleKm.toLocaleString()} km`;
+          camEl.textContent = `Camera: ${altKm.toLocaleString()} km · ${fmtDms(view.lat, 'N', 'S')} ${fmtDms(view.lon, 'E', 'W')}`;
+        },
+      });
+
+      // Dismiss Google Earth Loading Screen smoothly after initial render
+      setTimeout(() => {
+        splash.classList.add('loaded');
+      }, 950);
+
+      // Region search & popover
+      const regionList = document.getElementById('regionList');
+      const regionPopover = document.getElementById('regionPopover');
+      regions.forEach((name) => {
+        const opt = document.createElement('option');
+        opt.value = name.replace(/_/g, ' ');
+        regionList.appendChild(opt);
+
+        const btn = document.createElement('button');
+        btn.className = 'pop-item';
+        btn.type = 'button';
+        btn.dataset.region = name;
+        btn.setAttribute('aria-current', name === 'Global' ? 'true' : 'false');
+        btn.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true">public</span><span>${name.replace(/_/g, ' ')}</span>`;
+        btn.addEventListener('click', () => {
+          selectRegion(name);
+          regionPopover.classList.remove('open');
+        });
+        regionPopover.appendChild(btn);
+      });
+      ['Global (Worldwide)', 'Japan', 'Australia', 'Brazil', 'Indonesia', 'South Korea', 'Thailand', 'United States', 'Canada', 'India', 'Russia'].forEach((extra) => {
+        const opt = document.createElement('option');
+        opt.value = extra;
+        regionList.appendChild(opt);
+      });
+
+      function flyGoogle3DToRegion(regionKey) {
+        if (!gmpMap3dEl) return;
+        const target = window.FIRMSGlobe.REGION_CENTERS[regionKey] || window.FIRMSGlobe.REGION_CENTERS.Global;
+        const rangeMeters = regionKey === 'Global' ? 18500000 : Math.round(4200000 / (target.zoom || 1.5));
+        if (typeof gmpMap3dEl.flyCameraTo === 'function') {
+          gmpMap3dEl.flyCameraTo({
+            endCamera: {
+              center: { lat: target.lat, lng: target.lon, altitude: 0 },
+              range: rangeMeters,
+              tilt: regionKey === 'Global' ? 0 : 28,
+              heading: 0,
+            },
+            durationMillis: 1600,
+          });
+        } else {
+          gmpMap3dEl.setAttribute('center', `${target.lat},${target.lon},0`);
+          gmpMap3dEl.setAttribute('range', String(rangeMeters));
+        }
+        camEl.textContent = `Camera: ${Math.round(rangeMeters / 1000).toLocaleString()} km · ${fmtDms(target.lat, 'N', 'S')} ${fmtDms(target.lon, 'E', 'W')}`;
+      }
+
+      function selectRegion(name) {
+        const norm = name.trim().toLowerCase().replace(/\s+/g, '_');
+        const match = regions.find((r) => r.toLowerCase() === norm || r.toLowerCase().includes(norm)) || 'Global';
+        globe.focusRegion(match);
+        if (activeEngine === 'gmp3d') {
+          flyGoogle3DToRegion(match);
+        }
+        regionPopover.querySelectorAll('.pop-item').forEach((el) => {
+          el.setAttribute('aria-current', String(el.dataset.region === match));
+        });
+        return match;
+      }
+
+      const searchInputEl = document.getElementById('searchInput');
+      let lastTopSearchText = '';
+      let lastTopSearchTs = 0;
+
+      function submitTopSearch(raw) {
+        const q = (raw || '').trim();
+        if (!q) return;
+        const now = Date.now();
+        if (q === lastTopSearchText && now - lastTopSearchTs < 500) return;
+        lastTopSearchText = q;
+        lastTopSearchTs = now;
+
+        const norm = q.toLowerCase().replace(/\s+/g, '_');
+        const exactMacro = regions.find(
+          (r) => r.toLowerCase() === norm || r.toLowerCase().replace(/_/g, ' ') === q.toLowerCase()
+        );
+        if (exactMacro) {
+          selectRegion(exactMacro);
+          return;
+        }
+        aiDrawer?.classList.add('open');
+        aiTrigger?.setAttribute('aria-expanded', 'true');
+        handlePrompt(q);
+      }
+
+      searchInputEl.addEventListener('change', (e) => {
+        submitTopSearch(e.target.value);
+      });
+      searchInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.isComposing) {
+          e.preventDefault();
+          submitTopSearch(e.target.value);
+        }
+      });
+
+      // Popover positioning and toggles
+      const layerBtn = document.getElementById('layerBtn');
+      const layerBtnLabel = document.getElementById('layerBtnLabel');
+      const layerPopover = document.getElementById('layerPopover');
+      const regionBtn = document.getElementById('regionBtn');
+
+      function positionPopover(btn, pop) {
+        const rect = btn.getBoundingClientRect();
+        pop.style.insetInlineStart = `${Math.max(14, rect.left)}px`;
+      }
+
+      layerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        regionPopover.classList.remove('open');
+        positionPopover(layerBtn, layerPopover);
+        layerPopover.classList.toggle('open');
+      });
+
+      regionBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        layerPopover.classList.remove('open');
+        positionPopover(regionBtn, regionPopover);
+        regionPopover.classList.toggle('open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!layerPopover.contains(e.target)) layerPopover.classList.remove('open');
+        if (!regionPopover.contains(e.target)) regionPopover.classList.remove('open');
+      });
+
+      function setActiveLayer(layer, label) {
+        globe.setLayer(layer);
+        layerBtnLabel.textContent = `Layers: ${label}`;
+        layerPopover.querySelectorAll('.pop-item').forEach((b) => {
+          b.setAttribute('aria-current', String(b.dataset.layer === layer));
+        });
+      }
+
+      function flyBothEngines(lat, lon, zoomLevel) {
+        globe.flyTo(lat, lon, zoomLevel || 2.2);
+        if (activeEngine === 'gmp3d' && gmpMap3dEl) {
+          const rangeMeters = Math.round(2800000 / (zoomLevel || 2.0));
+          if (typeof gmpMap3dEl.flyCameraTo === 'function') {
+            gmpMap3dEl.flyCameraTo({
+              endCamera: { center: { lat, lng: lon, altitude: 0 }, range: rangeMeters, tilt: 32, heading: 0 },
+              durationMillis: 1400,
+            });
+          } else {
+            gmpMap3dEl.setAttribute('center', `${lat},${lon},0`);
+            gmpMap3dEl.setAttribute('range', String(rangeMeters));
+          }
+        }
+      }
+
+      const analytics = window.FIRMSAnalytics.createAnalytics({
+        data,
+        onFlyTo: flyBothEngines,
+        onProjectRiskPoints(pts) {
+          globe.setCustomPoints(pts);
+          setActiveLayer('risk', '7-Day Risk');
+        },
+        onProjectDetectPoints(pts) {
+          globe.setCustomPoints(pts);
+          setActiveLayer('detect', 'Live Events');
+        },
+      });
+
+      let cachedSwiddenPoints = [];
+
+      layerPopover.querySelectorAll('.pop-item').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const layer = btn.dataset.layer;
+          const label = btn.dataset.label;
+          if (layer === 'risk') {
+            globe.setCustomPoints(analytics.getRiskPoints());
+            analytics.openTab('tab-risk');
+            setActiveLayer(layer, label);
+          } else if (layer === 'detect') {
+            globe.setCustomPoints(analytics.getDetectPoints());
+            analytics.openTab('tab-detect');
+            setActiveLayer(layer, label);
+          } else if (layer === 'swidden') {
+            if (cachedSwiddenPoints.length > 0) {
+              globe.setCustomPoints(cachedSwiddenPoints);
+              setActiveLayer(layer, label);
+            } else {
+              handlePrompt('アマゾンの焼畑と天気を調べて範囲を拡大して解説して');
+            }
+          } else {
+            setActiveLayer(layer, label);
+          }
+          layerPopover.classList.remove('open');
+        });
+      });
+
+      // AI Drawer Show/Hide
+      const aiDrawer = document.getElementById('aiDrawer');
+      const aiToggleBtn = document.getElementById('aiToggleBtn');
+      const aiCloseBtn = document.getElementById('aiCloseBtn');
+      const aiFab = document.getElementById('aiFab');
+
+      function setAiOpen(open) {
+        aiDrawer.classList.toggle('hidden', !open);
+        aiToggleBtn.setAttribute('aria-pressed', String(open));
+        aiFab.style.display = open ? 'none' : 'inline-flex';
+      }
+
+      setAiOpen(true);
+      aiToggleBtn.addEventListener('click', () => setAiOpen(aiDrawer.classList.contains('hidden')));
+      aiCloseBtn.addEventListener('click', () => setAiOpen(false));
+      aiFab.addEventListener('click', () => setAiOpen(true));
+
+      // BYOK Dialog + localStorage helpers
+      const LS_GEMINI_KEY = 'FIRMS_GEMINI_API_KEY';
+      const LS_GEMINI_MODEL = 'FIRMS_GEMINI_MODEL';
+      const byokBtn = document.getElementById('byokBtn');
+      const byokDialog = document.getElementById('byokDialog');
+      const byokDialogKeyInput = document.getElementById('byokDialogKeyInput');
+      const byokDialogModelSelect = document.getElementById('byokDialogModelSelect');
+      const byokDialogStatus = document.getElementById('byokDialogStatus');
+      const byokDialogVerifyBtn = document.getElementById('byokDialogVerifyBtn');
+      const byokDialogCloseBtn = document.getElementById('byokDialogCloseBtn');
+
+      function getStoredGeminiKey() {
+        return (localStorage.getItem(LS_GEMINI_KEY) || byokDialogKeyInput.value || '').trim();
+      }
+      function getStoredGeminiModel() {
+        return (localStorage.getItem(LS_GEMINI_MODEL) || byokDialogModelSelect.value || 'gemini-3.1-flash-lite').trim();
+      }
+
+      async function initByokUi() {
+        try {
+          let cfg = null;
+          try {
+            const res = await fetch('/api/ai/config', { cache: 'no-store' });
+            if (res.ok) cfg = await res.json();
+          } catch {}
+          if (!cfg && window.StaticCopilot) {
+            cfg = await window.StaticCopilot.getConfig(localStorage.getItem(LS_GEMINI_KEY));
+          }
+          if (!cfg) return;
+          if (Array.isArray(cfg.models) && cfg.models.length) {
+            byokDialogModelSelect.innerHTML = cfg.models
+              .map((m) => `<option value="${m}">${m}</option>`)
+              .join('');
+          }
+          if (!localStorage.getItem(LS_GEMINI_KEY) && cfg.default_key) {
+            localStorage.setItem(LS_GEMINI_KEY, cfg.default_key);
+          }
+          byokDialogKeyInput.value = getStoredGeminiKey();
+          const curModel = localStorage.getItem(LS_GEMINI_MODEL) || cfg.model || 'gemini-3.1-flash-lite';
+          if ([...byokDialogModelSelect.options].some((o) => o.value === curModel)) {
+            byokDialogModelSelect.value = curModel;
+          }
+          byokDialogStatus.textContent = cfg.has_key
+            ? `Active key: ${cfg.masked_key} · Parquet datasets loaded`
+            : 'No API key set. Enter a Gemini key or visit /byok.html.';
+        } catch {
+          byokDialogKeyInput.value = getStoredGeminiKey();
+        }
+      }
+
+      byokBtn?.addEventListener('click', () => {
+        byokDialogKeyInput.value = getStoredGeminiKey();
+        byokDialog.showModal();
+      });
+      byokDialogCloseBtn?.addEventListener('click', () => byokDialog.close());
+
+      // Backdrop fallback for browsers lacking <dialog closedby="any">
+      if (byokDialog && !('closedBy' in HTMLDialogElement.prototype)) {
+        byokDialog.addEventListener('click', (event) => {
+          if (event.target === byokDialog) byokDialog.close();
+        });
+      }
+
+      byokDialogVerifyBtn?.addEventListener('click', async () => {
+        const apiKey = byokDialogKeyInput.value.trim();
+        const model = byokDialogModelSelect.value;
+        if (!apiKey) {
+          byokDialogStatus.textContent = 'API キーを入力してください。';
+          return;
+        }
+        localStorage.setItem(LS_GEMINI_KEY, apiKey);
+        localStorage.setItem(LS_GEMINI_MODEL, model);
+        byokDialogVerifyBtn.disabled = true;
+        byokDialogStatus.textContent = 'Verifying Gemini API key...';
+        try {
+          let out = null;
+          try {
+            const res = await fetch('/api/ai/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ apiKey, model }),
+            });
+            if (res.ok) out = await res.json();
+          } catch {}
+          if (!out && window.StaticCopilot) {
+            out = await window.StaticCopilot.verifyKey(apiKey, model);
+          }
+          if (!out) throw new Error('No verification endpoint available');
+          if (out.ok) {
+            if (out.model) localStorage.setItem(LS_GEMINI_MODEL, out.model);
+            byokDialogStatus.textContent = `Verified: ${out.masked_key} (${out.model}, ${out.latency_ms} ms)`;
+          } else {
+            byokDialogStatus.textContent = `Error: ${out.error || 'Verification failed'}`;
+          }
+        } catch (err) {
+          byokDialogStatus.textContent = `Network error: ${err.message}`;
+        } finally {
+          byokDialogVerifyBtn.disabled = false;
+        }
+      });
+
+      // AI Copilot linked to Parquet Weather/Swidden + Gemini BYOK + Globe/Analytics UI
+      const aiMessages = document.getElementById('aiMessages');
+      const aiInput = document.getElementById('aiInput');
+
+      function appendMsg(role, text) {
+        const div = document.createElement('div');
+        div.className = `msg ${role}`;
+        div.textContent = text;
+        aiMessages.appendChild(div);
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+        return div;
+      }
+
+      function applyTourStep(step, fullRes) {
+        if (!step) return;
+        if (step.flyTo) {
+          if (typeof globe.setAutoRotate === 'function') {
+            spinning = false;
+            globe.setAutoRotate(false);
+            spinBtn?.setAttribute('aria-pressed', 'false');
+          }
+          flyBothEngines(step.flyTo.lat, step.flyTo.lon, step.flyTo.zoom || 2.2);
+        }
+        if (step.highlightRange !== undefined) {
+          globe.setHighlightRange(step.highlightRange);
+        }
+        if (step.timeline && step.timeline.date) {
+          jumpTimelineToDate(step.timeline.date, {
+            layer: step.timeline.layer || step.layer || 'viirs',
+            showDock: true,
+          });
+        } else if (step.layer) {
+          if (step.layer === 'swidden' && (fullRes?.swidden_points?.length || cachedSwiddenPoints.length)) {
+            globe.setCustomPoints(fullRes?.swidden_points || cachedSwiddenPoints);
+            setActiveLayer('swidden', 'Swidden');
+          } else if (step.layer === 'risk') {
+            globe.setCustomPoints(analytics.getRiskPoints());
+            setActiveLayer('risk', '7-Day Risk');
+          } else if (step.layer === 'detect') {
+            globe.setCustomPoints(analytics.getDetectPoints());
+            setActiveLayer('detect', 'Live Events');
+          } else {
+            const labelMap = { viirs: 'VIIRS', modis: 'MODIS', gap: 'Bias Ratio', swidden: 'Swidden' };
+            setActiveLayer(step.layer, labelMap[step.layer] || step.layer);
+          }
+        }
+        if (step.analytics) {
+          analytics.focusAnalytics({
+            ...step.analytics,
+            label: fullRes?.location?.label || step.analytics.country || 'AI Region',
+          });
+        }
+      }
+
+      let activeAiController = null;
+
+      async function handlePrompt(text) {
+        const q = text.trim();
+        if (!q) return;
+        setAiOpen(true);
+        appendMsg('user', q);
+        const pendingEl = appendMsg('ai', 'Parquet (焼畑・気象・過去比較) と Gemini を照合中...');
+
+        if (activeAiController) activeAiController.abort();
+        activeAiController = new AbortController();
+
+        try {
+          let res = null;
+          try {
+            const resp = await fetch('/api/ai/analyze', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              signal: activeAiController.signal,
+              body: JSON.stringify({
+                prompt: q,
+                apiKey: getStoredGeminiKey(),
+                model: getStoredGeminiModel(),
+              }),
+            });
+            if (resp.ok) res = await resp.json();
+          } catch (fetchErr) {
+            if (fetchErr?.name === 'AbortError') throw fetchErr;
+          }
+          if (!res && window.StaticCopilot) {
+            res = await window.StaticCopilot.analyzeQuery({
+              prompt: q,
+              apiKey: getStoredGeminiKey(),
+              model: getStoredGeminiModel(),
+            });
+          }
+          if (!res) throw new Error('Copilot engine unavailable');
+          if (!res.ok) {
+            pendingEl.textContent = `解析エラー: ${res.error || 'Unknown error'}（BYOK Key を確認してください）`;
+            return;
+          }
+
+          if (Array.isArray(res.swidden_points) && res.swidden_points.length > 0) {
+            cachedSwiddenPoints = res.swidden_points;
+          }
+
+          const actions = res.actions || {};
+          if (typeof globe.setAutoRotate === 'function') {
+            spinning = false;
+            globe.setAutoRotate(false);
+            spinBtn?.setAttribute('aria-pressed', 'false');
+          }
+          if (actions.highlightRange !== undefined) {
+            globe.setHighlightRange(actions.highlightRange);
+          }
+          if (actions.timeline && actions.timeline.date) {
+            jumpTimelineToDate(actions.timeline.date, {
+              layer: actions.timeline.layer || actions.layer || 'viirs',
+              showDock: true,
+            });
+          } else if (actions.layer === 'swidden' && cachedSwiddenPoints.length > 0) {
+            globe.setCustomPoints(cachedSwiddenPoints);
+            setActiveLayer('swidden', 'Swidden');
+          } else if (actions.layer === 'risk') {
+            globe.setCustomPoints(analytics.getRiskPoints());
+            setActiveLayer('risk', '7-Day Risk');
+          } else if (actions.layer === 'detect') {
+            globe.setCustomPoints(analytics.getDetectPoints());
+            setActiveLayer('detect', 'Live Events');
+          } else if (actions.layer) {
+            const labelMap = { viirs: 'VIIRS', modis: 'MODIS', gap: 'Bias Ratio', swidden: 'Swidden' };
+            setActiveLayer(actions.layer, labelMap[actions.layer] || actions.layer);
+          }
+          if (actions.flyTo) {
+            flyBothEngines(actions.flyTo.lat, actions.flyTo.lon, actions.flyTo.zoom || 2.2);
+          }
+          if (actions.analytics) {
+            analytics.focusAnalytics({
+              ...actions.analytics,
+              label: res.location?.is_global ? '' : (res.location?.label || actions.analytics.country || 'AI Region'),
+            });
+          }
+
+          const sw = res.telemetry?.swidden || {};
+          const wx = res.telemetry?.weather || {};
+          const hm = res.telemetry?.harmonization || {};
+
+          pendingEl.textContent = '';
+          const replyPara = document.createElement('div');
+          replyPara.textContent = res.reply || '解析完了';
+          pendingEl.appendChild(replyPara);
+
+          const pillsWrap = document.createElement('div');
+          pillsWrap.className = 'ai-telemetry-pills';
+          const pillItems = [
+            `Location: ${res.location?.label || '--'}`,
+            actions.timeline?.date ? `Slider: ${actions.timeline.date}` : `Mode: ${actions.mode || actions.layer || 'auto'}`,
+            `7d Risk Mean: ${wx.mean_risk_p != null ? Math.round(wx.mean_risk_p * 100) + '%' : '--'}`,
+            `Tmax 7d: ${wx.tmax_mean_7 ?? '--'}°C · RH: ${wx.rh_mean_7 ?? '--'}% · Rain 30d: ${wx.precip_sum_30 ?? '--'}mm`,
+            `Swidden: ${Number(sw.swidden_cells || 0).toLocaleString()} (${sw.swidden_share_pct ?? 0}%)`,
+            `VIIRS/MODIS: ${hm.viirs_to_modis_ratio ?? '--'}x · ${res.model || 'gemini'}`,
+          ];
+          pillItems.forEach((txt) => {
+            const span = document.createElement('span');
+            span.className = 'ai-t-pill';
+            span.textContent = txt;
+            pillsWrap.appendChild(span);
+          });
+          pendingEl.appendChild(pillsWrap);
+
+          if (Array.isArray(res.tour_steps) && res.tour_steps.length > 0) {
+            const stepsWrap = document.createElement('div');
+            stepsWrap.className = 'ai-tour-steps';
+            res.tour_steps.forEach((step) => {
+              const b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'ai-step-btn';
+              b.textContent = step.label || 'Focus Step';
+              b.addEventListener('click', () => applyTourStep(step, res));
+              stepsWrap.appendChild(b);
+            });
+            pendingEl.appendChild(stepsWrap);
+          }
+          aiMessages.scrollTop = aiMessages.scrollHeight;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          pendingEl.textContent = `通信エラー: ${err.message}`;
+        }
+      }
+
+      document.getElementById('aiForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        handlePrompt(aiInput.value);
+        aiInput.value = '';
+      });
+
+      aiInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.isComposing || e.keyCode === 229)) {
+          e.preventDefault();
+        }
+      });
+
+      document.querySelectorAll('.ai-chips .chip').forEach((c) => {
+        c.addEventListener('click', () => handlePrompt(c.dataset.prompt || c.textContent));
+      });
+
+      initByokUi();
+
+      // Timeline Bar linked to FIRMS_DATA.weekly + /data/spatial_grid_1deg_yearly.json
+      const timeSlider = document.getElementById('timeSlider');
+      const timeLabel = document.getElementById('timeLabel');
+      const playBtn = document.getElementById('playBtn');
+      const playIcon = document.getElementById('playIcon');
+      const playText = document.getElementById('playText');
+      const timelineDock = document.getElementById('timelineDock');
+      const timelineToggleBtn = document.getElementById('timelineToggleBtn');
+      const tlYearPills = document.getElementById('tlYearPills');
+      const tlYearTicks = document.getElementById('tlYearTicks');
+      const tlDateSearch = document.getElementById('tlDateSearch');
+      const tlDateForm = document.getElementById('tlDateForm');
+
+      let maxIdx = Math.max(0, weekly.length - 1);
+      timeSlider.max = String(maxIdx);
+      timeSlider.value = String(maxIdx);
+
+      let playing = false;
+      let playTimer = null;
+      let yearStarts = [];
+
+      function rebuildTimelineControls() {
+        maxIdx = Math.max(0, weekly.length - 1);
+        timeSlider.max = String(maxIdx);
+        yearStarts = [];
+        let prevYr = null;
+        weekly.forEach((w, idx) => {
+          const yr = String(w.d || '').slice(0, 4);
+          if (yr && yr !== prevYr) {
+            yearStarts.push({ year: yr, idx });
+            prevYr = yr;
+          }
+        });
+        tlYearPills.innerHTML = '<button class="tl-year-pill" type="button" data-year="all" aria-pressed="true">All</button>';
+        tlYearTicks.innerHTML = '';
+        yearStarts.forEach(({ year, idx }) => {
+          const pill = document.createElement('button');
+          pill.className = 'tl-year-pill';
+          pill.type = 'button';
+          pill.dataset.year = year;
+          pill.setAttribute('aria-pressed', 'false');
+          pill.textContent = year;
+          tlYearPills.appendChild(pill);
+
+          const tick = document.createElement('button');
+          tick.className = 'tl-year-tick';
+          tick.type = 'button';
+          tick.dataset.year = year;
+          tick.textContent = year;
+          tick.style.insetInlineStart = `${maxIdx > 0 ? (idx / maxIdx) * 100 : 0}%`;
+          tick.title = `Jump to ${year}`;
+          tick.addEventListener('click', () => selectTimelineYear(year, true));
+          tlYearTicks.appendChild(tick);
+        });
+        if (weekly.length && tlDateSearch) {
+          tlDateSearch.min = weekly[0].d || '2000-01-01';
+        }
+      }
+
+      rebuildTimelineControls();
+
+      // Auto-merge 2000-2017 inferred LightGBM weekly data if available
+      fetch('./data/legacy_weekly_timeseries.json', { cache: 'no-cache' })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((legacyRows) => {
+          if (!Array.isArray(legacyRows) || !legacyRows.length) return;
+          const normLegacy = legacyRows.map((w) => ({
+            ...w,
+            d: w.d || String(w.week_start || '').slice(0, 10),
+            v: w.v != null ? w.v : (w.v_frp_sum || 0),
+            m: w.m != null ? w.m : (w.m_frp_sum || 0),
+          }));
+          const existingDates = new Set(weekly.map((w) => w.d));
+          const merged = [...normLegacy.filter((w) => !existingDates.has(w.d)), ...weekly].sort((a, b) => a.d.localeCompare(b.d));
+          weekly.length = 0;
+          weekly.push(...merged);
+          rebuildTimelineControls();
+          updateTimeline(maxIdx, false);
+        })
+        .catch(() => {});
+
+      let activeYearFilter = 'all';
+      const weeklyGridCache = new Map();
+      const weeklyGridPromises = new Map();
+      let latestWeekRequestId = 0;
+
+      function ensureWeeklyYearGrid(yearStr) {
+        if (weeklyGridCache.has(yearStr)) return Promise.resolve(weeklyGridCache.get(yearStr));
+        if (!weeklyGridPromises.has(yearStr)) {
+          const p = fetch(`/data/weekly_grid/${encodeURIComponent(yearStr)}.json`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((obj) => {
+              if (obj) weeklyGridCache.set(yearStr, obj);
+              return obj;
+            })
+            .catch(() => null);
+          weeklyGridPromises.set(yearStr, p);
+        }
+        return weeklyGridPromises.get(yearStr);
+      }
+
+      // Preload the most recent year's weekly grid in background for instant response
+      if (weekly.length) {
+        const lastYr = String(weekly[weekly.length - 1].d || '').slice(0, 4);
+        if (lastYr) setTimeout(() => { ensureWeeklyYearGrid(lastYr); }, 1000);
+      }
+
+      function syncYearPills(yearStr) {
+        activeYearFilter = yearStr;
+        tlYearPills.querySelectorAll('.tl-year-pill').forEach((b) => {
+          b.setAttribute('aria-pressed', String(b.dataset.year === yearStr));
+        });
+      }
+
+      function ensureSpatialLayerVisible() {
+        const curLayerBtn = layerPopover.querySelector('.pop-item[aria-current="true"]');
+        const curLayer = curLayerBtn ? curLayerBtn.dataset.layer : 'viirs';
+        if (curLayer === 'risk' || curLayer === 'detect' || curLayer === 'swidden') {
+          setActiveLayer('viirs', 'VIIRS');
+        }
+      }
+
+      async function applyWeekSpatialGrid(weekDateStr) {
+        const yearStr = String(weekDateStr || '').slice(0, 4);
+        if (!yearStr) return;
+        syncYearPills(yearStr);
+        ensureSpatialLayerVisible();
+        const reqId = ++latestWeekRequestId;
+        const weekMap = await ensureWeeklyYearGrid(yearStr);
+        if (reqId !== latestWeekRequestId || !weekMap) return;
+        const rows = weekMap[weekDateStr] || [];
+        globe.setTimeFactor(1.0);
+        globe.setGridData(rows, 'weekly');
+      }
+
+      function selectTimelineYear(yearStr, jumpSlider) {
+        if (yearStr === 'all') {
+          latestWeekRequestId++;
+          syncYearPills('all');
+          ensureSpatialLayerVisible();
+          globe.setTimeFactor(1.0);
+          globe.setGridData(data.grid, 'all');
+          return;
+        }
+        const found = yearStarts.find((y) => y.year === yearStr);
+        if (jumpSlider && found) {
+          updateTimeline(found.idx, true);
+        } else {
+          syncYearPills(yearStr);
+          const curItem = weekly[Number(timeSlider.value)];
+          if (curItem && curItem.d) applyWeekSpatialGrid(curItem.d);
+        }
+      }
+
+      tlYearPills.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tl-year-pill');
+        if (btn && btn.dataset.year) {
+          selectTimelineYear(btn.dataset.year, true);
+        }
+      });
+
+      function jumpTimelineToDate(targetDateStr, opts = {}) {
+        const { layer = 'viirs', showDock = true } = opts;
+        if (!weekly.length) return;
+        if (showDock) {
+          timelineDock.classList.remove('hidden');
+          timelineToggleBtn.setAttribute('aria-pressed', 'true');
+        }
+        if (playing) {
+          playing = false;
+          playIcon.textContent = 'play_arrow';
+          playText.textContent = 'Play';
+          if (playTimer) {
+            clearInterval(playTimer);
+            playTimer = null;
+          }
+        }
+        if (layer && ['viirs', 'modis', 'gap'].includes(layer)) {
+          const labelMap = { viirs: 'VIIRS', modis: 'MODIS', gap: 'Bias Ratio' };
+          setActiveLayer(layer, labelMap[layer] || layer);
+        }
+        const s = String(targetDateStr || '').trim();
+        if (!s || s === 'latest') {
+          updateTimeline(maxIdx, true);
+          return;
+        }
+        let bestIdx = maxIdx;
+        let bestDiff = Infinity;
+        const parsedMs = /^\d{4}$/.test(s) ? Date.parse(`${s}-07-01`) : Date.parse(s);
+        if (Number.isFinite(parsedMs)) {
+          weekly.forEach((w, idx) => {
+            const diff = Math.abs(Date.parse(w.d) - parsedMs);
+            if (diff < bestDiff) {
+              bestDiff = diff;
+              bestIdx = idx;
+            }
+          });
+        }
+        updateTimeline(bestIdx, true);
+      }
+
+      tlDateForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (tlDateSearch.value) jumpTimelineToDate(tlDateSearch.value, { showDock: false });
+      });
+
+      function updateTimeline(idx, syncSpatial = true) {
+        if (!weekly.length) return;
+        const clamped = Math.max(0, Math.min(maxIdx, idx));
+        timeSlider.value = String(clamped);
+        const item = weekly[clamped];
+        timeLabel.textContent = item.d || `Week ${clamped + 1}`;
+        if (item.d && tlDateSearch) tlDateSearch.value = item.d;
+        const curYr = String(item.d || '').slice(0, 4);
+        tlYearTicks.querySelectorAll('.tl-year-tick').forEach((t) => {
+          t.classList.toggle('active', t.dataset.year === curYr);
+        });
+        if (syncSpatial && item.d) {
+          applyWeekSpatialGrid(item.d);
+        }
+      }
+
+      updateTimeline(maxIdx, false);
+
+      timeSlider.addEventListener('input', (e) => updateTimeline(Number(e.target.value)));
+      document.getElementById('prevBtn').addEventListener('click', () => updateTimeline(Number(timeSlider.value) - 1));
+      document.getElementById('nextBtn').addEventListener('click', () => updateTimeline(Number(timeSlider.value) + 1));
+
+      playBtn.addEventListener('click', () => {
+        playing = !playing;
+        playIcon.textContent = playing ? 'pause' : 'play_arrow';
+        playText.textContent = playing ? 'Pause' : 'Play';
+        if (playing) {
+          playTimer = setInterval(() => {
+            const next = Number(timeSlider.value) + 1;
+            updateTimeline(next > maxIdx ? 0 : next);
+          }, 160);
+        } else if (playTimer) {
+          clearInterval(playTimer);
+          playTimer = null;
+        }
+      });
+
+      timelineToggleBtn.addEventListener('click', () => {
+        const hidden = timelineDock.classList.toggle('hidden');
+        timelineToggleBtn.setAttribute('aria-pressed', String(!hidden));
+      });
+
+      // Spin & Camera Controls
+      const spinBtn = document.getElementById('spinBtn');
+      let spinning = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      spinBtn?.setAttribute('aria-pressed', String(spinning));
+      spinBtn?.addEventListener('click', () => {
+        spinning = !spinning;
+        globe.setAutoRotate(spinning);
+        spinBtn?.setAttribute('aria-pressed', String(spinning));
+      });
+
+      function resetView() {
+        globe.clearHighlightRange?.();
+        analytics.clearFilter?.();
+        selectRegion('Global');
+      }
+      document.getElementById('homeBtn').addEventListener('click', resetView);
+      document.getElementById('resetBtn')?.addEventListener('click', resetView);
+      document.getElementById('compassBtn').addEventListener('click', resetView);
+      document.getElementById('zoomInBtn').addEventListener('click', () => globe.zoomBy(0.25));
+      document.getElementById('zoomOutBtn').addEventListener('click', () => globe.zoomBy(-0.25));
+
+      // Google Maps Platform 3D API (<gmp-map-3d>) Loader & Integration
+      const gmpBtn = document.getElementById('gmpBtn');
+      const gmpBtnText = document.getElementById('gmpBtnText');
+      const gmpModal = document.getElementById('gmpModal');
+      const gmpKeyInput = document.getElementById('gmpKeyInput');
+      const gmpMapContainer = document.getElementById('gmpMapContainer');
+
+      gmpBtn?.addEventListener('click', () => {
+        gmpModal.classList.add('open');
+      });
+
+      document.getElementById('gmpUseBuiltinBtn').addEventListener('click', () => {
+        activeEngine = 'builtin';
+        gmpMapContainer.classList.remove('active');
+        canvas.style.display = 'block';
+        gmpBtn?.setAttribute('aria-pressed', 'false');
+        if (gmpBtnText) gmpBtnText.textContent = 'Google 3D API';
+        gmpModal.classList.remove('open');
+      });
+
+      async function activateGoogleMaps3D(apiKey) {
+        if (!apiKey) return;
+        gmpModal.classList.remove('open');
+        splashStatusText.textContent = 'Connecting to Google Maps 3D API (maps3d)...';
+        splash.classList.remove('loaded');
+
+        try {
+          if (!window.google || !window.google.maps) {
+            await new Promise((resolve, reject) => {
+              const s = document.createElement('script');
+              s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async&libraries=maps3d&v=beta`;
+              s.async = true;
+              s.onload = resolve;
+              s.onerror = () => reject(new Error('Failed to load Google Maps JS API script.'));
+              document.head.appendChild(s);
+            });
+          }
+
+          // Wait briefly for google.maps.importLibrary to initialize
+          let retries = 0;
+          while ((!window.google || !window.google.maps || !window.google.maps.importLibrary) && retries < 25) {
+            await new Promise((r) => setTimeout(r, 100));
+            retries++;
+          }
+
+          const { Map3DElement, Marker3DElement } = await window.google.maps.importLibrary('maps3d');
+          gmpMapContainer.innerHTML = '';
+          gmpMap3dEl = new Map3DElement({
+            center: { lat: 20, lng: 135, altitude: 0 },
+            range: 18500000,
+            tilt: 0,
+            heading: 0,
+            mode: 'HYBRID',
+            internalUsageAttributionIds: ['gmp_git_agentskills_v1'],
+          });
+          gmpMap3dEl.setAttribute('internal-usage-attribution-ids', 'gmp_git_agentskills_v1');
+          gmpMapContainer.appendChild(gmpMap3dEl);
+
+          // Plot representative thermal hotspots on the 3D Map
+          const topHotspots = data.grid
+            .slice()
+            .sort((a, b) => b[3] - a[3])
+            .slice(0, 120);
+          topHotspots.forEach((row) => {
+            if (Marker3DElement) {
+              const marker = new Marker3DElement({
+                position: { lat: row[0], lng: row[1], altitude: 0 },
+                label: `${Math.round(row[3] / 1000)}GW`,
+              });
+              gmpMap3dEl.append(marker);
+            }
+          });
+
+          activeEngine = 'gmp3d';
+          canvas.style.display = 'none';
+          gmpMapContainer.classList.add('active');
+          gmpBtn?.setAttribute('aria-pressed', 'true');
+          if (gmpBtnText) gmpBtnText.textContent = 'Google 3D: Active';
+          zoomPctEl.textContent = 'Zoom: 100% · Engine: Google Maps 3D (gmp-map-3d)';
+        } catch (err) {
+          appendMsg('ai', `Google Maps 3D API Notice: ${err.message || 'Check your API key & billing settings.'} Falling back to built-in 3D Terrain Globe.`);
+        } finally {
+          setTimeout(() => splash.classList.add('loaded'), 500);
+        }
+      }
+
+      document.getElementById('gmpActivateBtn').addEventListener('click', () => {
+        const key = gmpKeyInput.value.trim();
+        if (key) {
+          activateGoogleMaps3D(key);
+        }
+      });
+
+      // Auto-activate if ?key= or ?prompt= is passed in URL query string
+      const urlParams = new URLSearchParams(window.location.search || '');
+      const urlKey = urlParams.get('key') || window.GOOGLE_MAPS_API_KEY || '';
+      if (urlKey) {
+        gmpKeyInput.value = urlKey;
+        activateGoogleMaps3D(urlKey);
+      }
+      const urlPrompt = (urlParams.get('prompt') || '').trim();
+      if (urlPrompt) {
+        setTimeout(() => handlePrompt(urlPrompt), 450);
+      }
+    })();
+  </script>
+</body>
+</html>
