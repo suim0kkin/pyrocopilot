@@ -134,6 +134,7 @@
       data,
       onFlyTo,
       onProjectRiskPoints,
+      onRiskLoaded,
       onProjectDetectPoints,
     } = options;
 
@@ -676,6 +677,10 @@
       if (weekly) remoteWeekly = weekly;
 
       renderAll();
+
+      if (onRiskLoaded && riskData?.cities?.length) {
+        onRiskLoaded(riskData.cities.map((c) => ({ lat: c.lat, lon: c.lon, t: c[riskModelKey] })));
+      }
 
       if (apiStatus && apiStatus.refreshing && (!risk || !detect)) {
         if (!statusPollTimer) {

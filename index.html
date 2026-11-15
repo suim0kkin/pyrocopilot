@@ -1215,7 +1215,7 @@
       </button>
       <button id="layerBtn" class="nav-btn" type="button" aria-pressed="false">
         <span class="material-symbols-outlined" aria-hidden="true">layers</span>
-        <span id="layerBtnLabel">Layers: VIIRS</span>
+        <span id="layerBtnLabel">Layers: 7-Day Risk</span>
       </button>
       <button id="timelineToggleBtn" class="nav-btn" type="button" aria-pressed="true">
         <span class="material-symbols-outlined" aria-hidden="true">history</span>
@@ -1236,7 +1236,7 @@
 
   <!-- Layer Popover -->
   <div id="layerPopover" class="popover" role="menu" aria-label="Thermal Layers">
-    <button class="pop-item" data-layer="viirs" data-label="VIIRS" aria-current="true" type="button">
+    <button class="pop-item" data-layer="viirs" data-label="VIIRS" aria-current="false" type="button">
       <span class="material-symbols-outlined" aria-hidden="true">local_fire_department</span>
       <span>● VIIRS 375m Heat</span>
     </button>
@@ -1248,7 +1248,7 @@
       <span class="material-symbols-outlined" aria-hidden="true">compare_arrows</span>
       <span>◆ Sensor Bias Ratio</span>
     </button>
-    <button class="pop-item" data-layer="risk" data-label="7-Day Risk" aria-current="false" type="button">
+    <button class="pop-item" data-layer="risk" data-label="7-Day Risk" aria-current="true" type="button">
       <span class="material-symbols-outlined" aria-hidden="true">warning</span>
       <span>● 7-Day Fire Risk (Live)</span>
     </button>
@@ -1674,7 +1674,7 @@
 
       const globe = window.FIRMSGlobe.createGlobe(canvas, {
         data: data.grid,
-        layer: 'viirs',
+        layer: 'risk',
         colorMode: 'red-blue',
         onViewChange(view) {
           if (activeEngine !== 'builtin') return;
@@ -1847,6 +1847,12 @@
         onProjectRiskPoints(pts) {
           globe.setCustomPoints(pts);
           setActiveLayer('risk', '7-Day Risk');
+        },
+        onRiskLoaded(pts) {
+          const cur = layerPopover.querySelector('.pop-item[aria-current="true"]')?.dataset.layer;
+          if (cur === 'risk') {
+            globe.setCustomPoints(pts);
+          }
         },
         onProjectDetectPoints(pts) {
           globe.setCustomPoints(pts);
